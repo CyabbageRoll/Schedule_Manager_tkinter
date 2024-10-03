@@ -6,6 +6,7 @@ class DisplayWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
+        self.font = master.font
         self.SP = master.SP
         self.SD = master.SD
 
@@ -27,6 +28,7 @@ class DisplayWindow(ttk.Notebook):
         self.w["Projects"] = tk.Frame(self, bg="#ee4444")
         self.w["Settings"] = tk.Frame(self, bg="#ee5555")
         self.w["Follows"] = tk.Frame(self, bg="#ee5555")
+        self.w["Selector"] = tk.Frame(self, bg="#ee5555")
 
 
     def pack_widgets(self):

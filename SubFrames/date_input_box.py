@@ -8,6 +8,7 @@ class DateInputBox(tk.Frame):
     def __init__(self, master, press_enter_callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
+        self.font = master.font
         self.press_enter_callback = press_enter_callback
         self.set_variables()
         self.set_widgets()
@@ -26,8 +27,8 @@ class DateInputBox(tk.Frame):
 
     def set_widgets(self):
         self.w = defaultdict(list)
-        self.w["date_input_box"] = tk.Entry(self, textvariable=self.v_date, width=9, justify=tk.CENTER)
-        self.w["weekday"] = tk.Label(self, textvariable=self.v_weekday, width=3)
+        self.w["date_input_box"] = tk.Entry(self, textvariable=self.v_date, width=9, justify=tk.CENTER, font=self.font)
+        self.w["weekday"] = tk.Label(self, textvariable=self.v_weekday, width=3, font=self.font)
 
     def pack_widgets(self):
         for key, widget in self.w.items():

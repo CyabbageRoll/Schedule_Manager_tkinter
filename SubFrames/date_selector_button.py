@@ -13,6 +13,7 @@ class DateSelectorButton(tk.Frame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
+        self.font = master.font
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -28,10 +29,10 @@ class DateSelectorButton(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         s = 1
-        self.w["left_arrow"] = tk.Button(self, text="◀️", width=s, height=s, command=self.click_left)
+        self.w["left_arrow"] = tk.Button(self, text="◀️", width=s, height=s, command=self.click_left, font=self.font)
         self.w["date_box"] = sf.DateInputBox(self, press_enter_box=None, height=s)
-        self.w["right_arrow"] = tk.Button(self, text="▶️", width=s, height=s, command=self.click_right)
-        self.w["move_today"] = tk.Button(self, text="Today", width=s, height=s, command=self.click_today)
+        self.w["right_arrow"] = tk.Button(self, text="▶️", width=s, height=s, command=self.click_right, font=self.font)
+        self.w["move_today"] = tk.Button(self, text="Today", width=s, height=s, command=self.click_today, font=self.font)
 
     def pack_widgets(self):
         for key, widget in self.w.items():

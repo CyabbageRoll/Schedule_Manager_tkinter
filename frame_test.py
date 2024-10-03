@@ -10,7 +10,7 @@ class TestTk(tk.Tk):
     def __init__(self, test_class):
         super().__init__()
         self.logger = utils.logger_settings()
-        self.SP = ds.SettingParameters()
+        self.SP = ds.SettingParametersRW()
         self.GP = ds.GUIParameters()
         self.SD = ds.ScheduleData()
 

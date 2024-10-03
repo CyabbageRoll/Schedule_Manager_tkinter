@@ -2,14 +2,12 @@
 # default
 import os
 import tkinter as tk
-
-# additional
-
+import tkinter.font
+from tkinter import ttk
 
 # user
 import DataSettingRW as ds
 import MainFrames as mf
-# import SubFrames as sf
 import utils
 
 
@@ -17,22 +15,31 @@ class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.logger = utils.logger_settings()
-        self.SP = ds.SettingParameters()
-        self.GP = ds.GUIParameters()
-        self.SD = ds.ScheduleData()
+        p_dir = os.path.dirname(os.path.dirname(__file__))
+        json_wr = ds.JSONReadWrite(p_dir, self.logger)
+        self.SP, self.GP, self.MEMO = json_wr.read()
+        self.SD = ds.read_schedule_data(self.SP.server_dir)
+
         self.tk_setting()
         self.set_frames()
         self.grid_frames()
 
     def tk_setting(self):
+        self.font = tkinter.font.Font(self, family=self.GP.font_family, size=self.GP.font_size)
         self.title("Schedule App")
         self.geometry(f"{self.GP.window_width}x{self.GP.window_height}")
         self.configure(bg=self.GP.window_bg_color)
 
+        s = ttk.Style()
+        s.configure('TNotebook.Tab', font=self.font)
+        s.configure('Treeview', font=self.font)
+        s.configure('Treeview.Heading', font=self.font)
+
+
     def set_frames(self):
         self.ob = mf.OptionBar(self, bg="#e09999", height=100, width=900)
-        self.rw = mf.CommandWindow(self, height=500, width=300)
-        self.dw = mf.DisplayWindow(self, height=500, width=600)
+        self.rw = mf.CommandWindow(self, height=500, width=350)
+        self.dw = mf.DisplayWindow(self, height=500, width=550)
 
     def grid_frames(self):
         self.ob.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW)

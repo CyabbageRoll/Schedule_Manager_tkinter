@@ -1,11 +1,17 @@
 import tkinter as tk
 from tkinter import ttk
 from collections import OrderedDict
+# user
+import SubFrames as sf
+import MainFrames as mf
+import DataSettingRW as ds
+
 
 class CommandWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
+        self.font = master.font
         self.SP = master.SP
         self.SD = master.SD
 
@@ -23,10 +29,10 @@ class CommandWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Daily"] = tk.Frame(self, bg="#5555ee")
-        self.w["Task1"] = tk.Frame(self, bg="#2222ee")
-        self.w["Task2"] = tk.Frame(self, bg="#3333ee")
-        self.w["Project"] = tk.Frame(self, bg="#4444ee")
+        self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
+        self.w["Daily"] = mf.DailyInformation(self, bg="#5555ee")
+        self.w["ToDo1"] = tk.Frame(self, bg="#2222ee")
+        self.w["ToDo2"] = tk.Frame(self, bg="#3333ee")
         self.w["Team"] = tk.Frame(self, bg="#6666ee")
         self.w["Memo"] = tk.Frame(self, bg="#7777ee")
 
@@ -36,7 +42,7 @@ class CommandWindow(ttk.Notebook):
             # widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def save_button(self):
-        pass
+        ds.save_df_as_pkl(self.SD, self.SP.server_dir)
 
     def load_button(self):
-        pass
+        self.SD = ds.read_schedule_data(self.SP.server_dir)

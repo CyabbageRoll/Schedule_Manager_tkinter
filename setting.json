@@ -1,0 +1,10 @@
+{
+    "Setting": {
+        "server_dir": "../DB_DIR",
+        "user": "User"
+    },
+    "GUI": {
+        "window_width": 1500,
+        "window_height": 1000
+    }
+}
