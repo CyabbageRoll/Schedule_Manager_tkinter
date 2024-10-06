@@ -8,13 +8,13 @@ from tkinter import ttk
 # user
 import DataSettingRW as ds
 import MainFrames as mf
-import utils
+import utils as ut
 
 
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.logger = utils.logger_settings()
+        self.logger = ut.logger_settings()
         p_dir = os.path.dirname(os.path.dirname(__file__))
         json_wr = ds.JSONReadWrite(p_dir, self.logger)
         self.SP, self.GP, self.MEMO = json_wr.read()

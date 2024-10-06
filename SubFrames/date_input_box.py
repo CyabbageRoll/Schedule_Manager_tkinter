@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict
 import datetime
 import tkinter as tk
 from dateutil.relativedelta import relativedelta
@@ -26,7 +26,7 @@ class DateInputBox(tk.Frame):
         self.update_display_date()
 
     def set_widgets(self):
-        self.w = defaultdict(list)
+        self.w = OrderedDict()
         self.w["date_input_box"] = tk.Entry(self, textvariable=self.v_date, width=9, justify=tk.CENTER, font=self.font)
         self.w["weekday"] = tk.Label(self, textvariable=self.v_weekday, width=3, font=self.font)
 
@@ -58,7 +58,10 @@ class DateInputBox(tk.Frame):
             self.press_enter_callback()
 
     def date2str(self, date):
-        str_date = date.strftime(r"%Y/%m/%d")
+        if isinstance(date, str):
+            str_date = date
+        else:
+            str_date = date.strftime(r"%Y/%m/%d")
         return str_date
 
     def str2date(self, str_date):
@@ -112,6 +115,13 @@ class DateInputBox(tk.Frame):
             self.logger.debug(E)
             return None
         
+    def set(self, date):
+        self.selected_date = date
+        self.update_display_date()
+
+    def get(self):
+        return self.selected_date
+
 
 if __name__ == "__main__":
 

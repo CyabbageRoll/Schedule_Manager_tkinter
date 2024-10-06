@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import OrderedDict
 import datetime
 import tkinter as tk
 import pandas as pd
@@ -32,12 +32,11 @@ class DailyInformation(tk.Frame):
         return t
 
     def set_widgets(self):
-        self.w = defaultdict(list)
-        """label_combo : {label_text: [initial value, [combobox item list], state, label_width_ratio]} """
-        label_combo = {}
-        for k in self.SD.di.columns:
-            label_combo[k] = [k, [], "normal", 12]
-        self.w["Info_area"] = sf.InputListArea(self, label_combo_dict=label_combo)
+        self.w = OrderedDict()
+        input_rows = {}
+        for k in self.SD["daily_info"].columns:
+            input_rows[k] = ["combobox", [k, [], "normal"]]
+        self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
         
         # 1日の予定入力欄
         self.w["table"] = sf.ScrollableTable(self, df=self.df, widths=[100, 250, 250])

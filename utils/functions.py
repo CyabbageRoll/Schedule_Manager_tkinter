@@ -1,6 +1,17 @@
 import datetime
 
 
+def is_floatable(str, logger):
+    flag = True
+    try:
+        float(str)
+    except Exception as e:
+        logger.debug(str)
+        logger.debug(e)
+        flag = False
+    return flag
+
+
 
 
 
