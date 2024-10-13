@@ -29,7 +29,7 @@ class OptionBar(tk.Frame):
         self.w = OrderedDict()
         s = 1
         self.w["date_selector"] = sf.DateSelectorButton(self)
-        self.w["selector"] = sf.UserSelectors(self)
+        self.w["selector"] = sf.UserSelector(self)
         self.w["save_button"] = tk.Button(self, text="Save", width=s, height=s, command=self.save_button, font=self.font)
         self.w["load_button"] = tk.Button(self, text="Load", width=s, height=s, command=self.load_button, font=self.font)
 

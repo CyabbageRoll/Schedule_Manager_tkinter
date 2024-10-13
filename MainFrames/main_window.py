@@ -2,7 +2,9 @@ from collections import OrderedDict
 import tkinter as tk
 from tkinter import ttk
 
-class DisplayWindow(ttk.Notebook):
+import MainFrames as mf
+
+class MainWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
@@ -24,11 +26,14 @@ class DisplayWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Tasks"] = tk.Frame(self, bg="#ee2222")
-        self.w["Projects"] = tk.Frame(self, bg="#ee4444")
-        self.w["Settings"] = tk.Frame(self, bg="#ee5555")
+        self.w["Project"] = mf.ProjectManage(self, bg="#3333ee")
+        self.w["Schedule-Task"] = tk.Frame(self, bg="#ee5555")
+        self.w["Schedule-Project"] = tk.Frame(self, bg="#ee5555")
+        self.w["ATT-Task"] = tk.Frame(self, bg="#ee5555")
+        self.w["ATT-Project"] = tk.Frame(self, bg="#ee4444")
+        self.w["Regularly"] = tk.Frame(self, bg="#ee2222")
+        self.w["Projects"] = tk.Frame(self, bg="#ee2222")
         self.w["Follows"] = tk.Frame(self, bg="#ee5555")
-        self.w["Selector"] = tk.Frame(self, bg="#ee5555")
 
 
     def pack_widgets(self):

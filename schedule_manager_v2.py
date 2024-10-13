@@ -38,8 +38,8 @@ class ScheduleManager(tk.Tk):
 
     def set_frames(self):
         self.ob = mf.OptionBar(self, bg="#e09999", height=100, width=900)
-        self.rw = mf.CommandWindow(self, height=500, width=350)
-        self.dw = mf.DisplayWindow(self, height=500, width=550)
+        self.rw = mf.SubWindow(self, height=500, width=350)
+        self.dw = mf.MainWindow(self, height=500, width=550)
 
     def grid_frames(self):
         self.ob.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW)

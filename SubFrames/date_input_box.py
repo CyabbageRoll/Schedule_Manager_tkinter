@@ -1,3 +1,9 @@
+"""
+Date Input Box
+[    Date     ][weekday]
+"""
+
+
 from collections import OrderedDict
 import datetime
 import tkinter as tk
@@ -117,7 +123,11 @@ class DateInputBox(tk.Frame):
         
     def set(self, date):
         self.selected_date = date
-        self.update_display_date()
+        if date is None:
+            self.v_date.set("")
+            self.v_weekday.set("")
+        else:
+            self.update_display_date()
 
     def get(self):
         return self.selected_date

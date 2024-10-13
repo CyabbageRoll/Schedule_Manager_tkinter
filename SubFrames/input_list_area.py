@@ -7,13 +7,13 @@ import SubFrames as sf
 
 class LabelCombo(tk.Frame):
     def __init__(self, master, 
-                 label_txt, init_txt="", label_width_ratio=2, state="normal", combo_list=[],
+                 label_txt, init_txt="", label_width=2, state="normal", combo_list=[],
                  **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
         self.set_variables(combo_list)
-        self.set_widgets(label_width_ratio, state)
+        self.set_widgets(label_width, state)
         self.pack_widgets()
         self.set_init(label_txt, init_txt)
         # self.logger.debug("label combo DataSelectorButton")
@@ -53,13 +53,13 @@ class LabelCombo(tk.Frame):
 
 class LabelDateInputBox(tk.Frame):
     def __init__(self, master,
-                 label_txt="label", init_date="", label_width_ratio=2,
+                 label_txt="label", init_date="", label_width=2,
                  press_enter_callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
         self.set_variables()
-        self.set_widgets(label_width_ratio, press_enter_callback)
+        self.set_widgets(label_width, press_enter_callback)
         self.pack_widgets()
         self.set_init(label_txt, init_date)
 
@@ -92,13 +92,13 @@ class LabelDateInputBox(tk.Frame):
 
 class LabelColorSelector(tk.Frame):
     def __init__(self, master,
-                label_txt="label", init_color="", label_width_ratio=2, 
+                label_txt="label", init_color="", label_width=2, 
                 **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
         self.set_variables()
-        self.set_widgets(label_width_ratio)
+        self.set_widgets(label_width)
         self.pack_widgets()
         self.set_init(label_txt, init_color)
 
@@ -159,18 +159,18 @@ class InputListArea(tk.Frame):
                                                init_txt=items[0], 
                                                combo_list=items[1],
                                                state=items[2],
-                                               label_width_ratio=label_width)
+                                               label_width=label_width)
             elif item_type == "date":
                 self.w[label_txt] = LabelDateInputBox(self, 
                                                       label_txt=label_txt,
                                                       init_date=items[0],
                                                       press_enter_callback=items[1],
-                                                      label_width_ratio=label_width)
+                                                      label_width=label_width)
             elif item_type == "color":
                 self.w[label_txt] = LabelColorSelector(self,
                                                        label_txt=label_txt,
                                                        init_color=items[0],
-                                                       label_width_ratio=label_width)
+                                                       label_width=label_width)
             else:
                 raise f"InputListArea not support type {item_type}"
 

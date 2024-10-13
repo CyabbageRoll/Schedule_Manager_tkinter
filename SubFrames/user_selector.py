@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 
-class UserSelectors(tk.Frame):
+class UserSelector(tk.Frame):
     def __init__(self, master, callback_dict={}, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
@@ -14,11 +14,6 @@ class UserSelectors(tk.Frame):
         self.MEMO = master.MEMO
 
         self.call_back_select_user = callback_dict.get("select_user", lambda : None)
-        # self.call_back_code1_selector = callback_dict.get("code1_selector", lambda : None)
-        # self.call_back_code2_selector = callback_dict.get("code2_selector", lambda : None)
-        # self.call_back_code3_selector = callback_dict.get("code3_selector", lambda : None)
-        # self.call_back_code4_selector = callback_dict.get("code4_selector", lambda : None)
-        # self.call_back_prj_selector = callback_dict.get("prj_selector", lambda : None)
 
         self.set_variables()
         self.set_widgets()
@@ -43,11 +38,6 @@ class UserSelectors(tk.Frame):
                                                height=10, width=15, 
                                                state="readonly",
                                                font=self.font)
-        # self.w["code1_selector"] = tk.Button(self, text="Code1", width=s, height=s, command=self.code1_selector)
-        # self.w["code2_selector"] = tk.Button(self, text="Code2", width=s, height=s, command=self.code2_selector)
-        # self.w["code3_selector"] = tk.Button(self, text="Code3", width=s, height=s, command=self.code3_selector)
-        # self.w["code4_selector"] = tk.Button(self, text="Code4", width=s, height=s, command=self.code4_selector)
-        # self.w["Project_selector"] = tk.Button(self, text="Project", width=s, height=s, command=self.prj_selector)
 
     def pack_widgets(self):
         for key, widget in self.w.items():
@@ -59,24 +49,6 @@ class UserSelectors(tk.Frame):
 
     def select_user(self, event):
         self.call_back_select_user(self.display_user.get())
-
-    # def code1_selector(self):
-    #     self.call_back_code1_selector()
-
-    # def code2_selector(self):
-    #     self.call_back_code2_selector()
-
-    # def code3_selector(self):
-    #     self.call_back_code3_selector()
-
-    # def code4_selector(self):
-    #     self.call_back_code4_selector()
-
-    # def prj_selector(self):
-    #     self.call_back_prj_selector()
-
-
-
 
 
 

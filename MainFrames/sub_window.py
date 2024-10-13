@@ -7,7 +7,7 @@ import MainFrames as mf
 import DataSettingRW as ds
 
 
-class CommandWindow(ttk.Notebook):
+class SubWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
@@ -29,10 +29,9 @@ class CommandWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
         self.w["Daily"] = mf.DailyInformation(self, bg="#5555ee")
-        self.w["ToDo1"] = tk.Frame(self, bg="#2222ee")
-        self.w["ToDo2"] = tk.Frame(self, bg="#3333ee")
+        self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
+        self.w["Ticket"] = tk.Frame(self, bg="#2222ee")
         self.w["Team"] = tk.Frame(self, bg="#6666ee")
         self.w["Memo"] = tk.Frame(self, bg="#7777ee")
 
