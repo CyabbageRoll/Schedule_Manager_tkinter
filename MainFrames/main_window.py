@@ -26,13 +26,13 @@ class MainWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Project"] = mf.ProjectManage(self, bg="#3333ee")
+        # self.w["Project-Manage"] = mf.ProjectManage(self, bg="#3333ee")
+        self.w["Projects-Display"] = mf.ProjectDisplay(self, bg="#ee2222")
         self.w["Schedule-Task"] = tk.Frame(self, bg="#ee5555")
         self.w["Schedule-Project"] = tk.Frame(self, bg="#ee5555")
         self.w["ATT-Task"] = tk.Frame(self, bg="#ee5555")
         self.w["ATT-Project"] = tk.Frame(self, bg="#ee4444")
         self.w["Regularly"] = tk.Frame(self, bg="#ee2222")
-        self.w["Projects"] = tk.Frame(self, bg="#ee2222")
         self.w["Follows"] = tk.Frame(self, bg="#ee5555")
 
 

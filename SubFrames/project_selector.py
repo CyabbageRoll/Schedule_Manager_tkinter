@@ -18,7 +18,7 @@ class ProjectSelector(tk.Frame):
         self.class_list=["Project1", "Project2", "Project3", "Project4", "Task", "Ticket"]
         self.class_dict = {f"P{i}": c for i, c in enumerate(self.class_list)}
         self.class2idx = {c: i for i, c in enumerate(self.class_list)}
-        self.changed = self.tmp
+        self.call_back_changed = self.call_back_none
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -31,12 +31,12 @@ class ProjectSelector(tk.Frame):
     def set_widgets(self):
         self.w1 = OrderedDict()
         self.w1["Space0"] = tk.Label(self, text="", font=self.font)
-        self.w1["Text1"] = tk.Label(self, text="⭐️⭐️⭐️⭐️⭐️ Select Item Class ⭐️⭐️⭐️⭐️⭐️", font=self.font)
+        self.w1["Text1"] = tk.Label(self, text=" Select Item Class ", font=self.font)
         self.w1["Space1"] = tk.Label(self, text="", font=self.font)
         self.w1["Class_selector"] = sf.LabelCombo(self,
                                                   label_txt="Select Class",
                                                   label_width=20,
-                                                  init_txt="Project1",
+                                                  init_value="Project1",
                                                   state="readonly",
                                                   combo_list=self.class_list)
 
@@ -52,6 +52,7 @@ class ProjectSelector(tk.Frame):
         
         self.w3 = OrderedDict()
         self.w3["Idx"] = sf.LabelCombo(self, label_txt="index", label_width=20, state="disabled")
+        self.w3["ClearButton"] = tk.Button(self, text="Clear", command=self.clear_button_press, font=self.font)
 
     def pack_widgets(self):
         selected_class = self.w1["Class_selector"].get()
@@ -64,7 +65,8 @@ class ProjectSelector(tk.Frame):
             widget.pack(side=tk.TOP, fill=tk.X, expand=False)
 
         self.w1[prj_k].pack(side=tk.TOP, fill=tk.X, expand=False)
-        self.w3["Idx"].pack(side=tk.TOP, fill=tk.X, expand=False)
+        # self.w3["Idx"].pack(side=tk.TOP, fill=tk.X, expand=False)
+        self.w3["ClearButton"].pack(side=tk.TOP, fill=tk.NONE, expand=False)
 
     def pack_forget_widgets(self):
         for w in [self.w1, self.w2, self.w3]:
@@ -76,14 +78,14 @@ class ProjectSelector(tk.Frame):
         self.update_idx()
 
     def set_bind(self):
-        self.w1["Class_selector"].w["Combobox"].bind("<<ComboboxSelected>>", self.class_select_changed)
+        self.w1["Class_selector"].w["Box"].bind("<<ComboboxSelected>>", self.class_select_changed)
         # for文にすると、lambda式の中の番号がうまくいかない
-        self.w1[f"P0"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 0))
-        self.w1[f"P1"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 1))
-        self.w1[f"P2"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 2))
-        self.w1[f"P3"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 3))
-        self.w1[f"P4"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 4))
-        self.w1[f"P5"].w["Combobox"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 5))
+        self.w1[f"P0"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 0))
+        self.w1[f"P1"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 1))
+        self.w1[f"P2"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 2))
+        self.w1[f"P3"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 3))
+        self.w1[f"P4"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 4))
+        self.w1[f"P5"].w["Box"].bind("<<ComboboxSelected>>", lambda x: self.prj_select_changed(x, 5))
 
     # 表示するComboboxを変更する
     def class_select_changed(self, event):
@@ -91,18 +93,18 @@ class ProjectSelector(tk.Frame):
         self.pack_widgets()
         self.update_idx()
 
-    def prj_select_changed(self, event, idx):
-        self.reset_values(idx)
+    def prj_select_changed(self, event, class_idx):
+        self.reset_values(class_idx)
         self.reset_list_box()
         self.update_list_box()
-        self.update_idx()
+        self.update_idx()        
 
     def reset_list_box(self):
         for i in range(6):
-            self.w1[f"P{i}"].w["Combobox"]["values"] = []
+            self.w1[f"P{i}"].set_list([])
 
-    def reset_values(self, idx):
-        for i in range(idx+1, 6):
+    def reset_values(self, class_idx):
+        for i in range(class_idx+1, 6):
             self.w1[f"P{i}"].set("")
 
     def update_list_box(self):
@@ -110,7 +112,7 @@ class ProjectSelector(tk.Frame):
         for i, idx in enumerate(["0"] + self.ids[:-1]):
             if idx:
                 name_list = self.SD[i+1][self.SD[i+1]["Parent_ID"] == idx]["Name"].tolist()
-                self.w1[f"P{i}"].w["Combobox"]["values"] = name_list
+                self.w1[f"P{i}"].set_list(name_list)
 
     def find_prj_ids_from_input(self):
         idx = "0"
@@ -148,7 +150,13 @@ class ProjectSelector(tk.Frame):
     
     def item_changed(self):
         parent, selected_class, idx = self.get()
-        self.changed(parent, selected_class, idx)
+        self.call_back_changed(parent, selected_class, idx)
 
-    def tmp(self, p, s, i):
+    def call_back_none(self, p, s, i):
         pass
+
+    def clear_button_press(self):
+        selected_class = self.w1["Class_selector"].get()
+        class_idx = self.class2idx[selected_class]
+        self.w1[f"P{class_idx}"].set("")
+        self.prj_select_changed(None, class_idx)

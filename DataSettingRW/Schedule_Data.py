@@ -30,32 +30,117 @@ def save_schedule_data(SD, db_dir):
     SD["daily_info"].to_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
 
 
-def list_to_hash_w_ms(input_list):
-    str_list = [f"{si}" for si in input_list] + [datetime.datetime.now().strftime("%f")]
-    s = "-".join(str_list)
-    return hashlib.md5(s.encode()).hexdigest()[:10]
+# def list_to_hash_w_ms(input_list):
+#     str_list = [f"{si}" for si in input_list] + [datetime.datetime.now().strftime("%f")]
+#     s = "-".join(str_list)
+#     return hashlib.md5(s.encode()).hexdigest()[:10]
 
 
-def numbering_item(input_list):
-    str_list = [f"{si}" for si in input_list]
-    s = "-".join(str_list)
-    md5 = hashlib.md5(s.encode()).hexdigest()[:5]
-    dd = datetime.datetime.now().strftime("%y%m%d")
-    return md5 + dd
+def serial_numbering(owner):
+    n = datetime.datetime.now().strftime("%y%m%d%f")
+    n1, n2 = n[:6], n[6:]
+    return n1 + "_" + hashlib.md5((n2 + owner).encode()).hexdigest()[:4]
 
 
-def add_list_to_df_last_row(df, new_items, exist_ok=False, idx=None):
-    if not idx:
-        idx = list_to_hash_w_ms(new_items[:3])
+# def numbering_item(input_list):
+#     str_list = [f"{si}" for si in input_list]
+#     s = "-".join(str_list)
+#     md5 = hashlib.md5(s.encode()).hexdigest()[:5]
+#     dd = datetime.datetime.now().strftime("%y%m%d")
+#     return md5 + dd
+
+
+# def add_list_to_df_last_row(df, new_items, exist_ok=False, idx=None):
+#     if not idx:
+#         idx = list_to_hash_w_ms(new_items[:3])
+#     flag = True
+#     if idx not in df.index.tolist():
+#         df.loc[idx, :] = new_items
+#     elif exist_ok:
+#         df.loc[idx, :] = new_items
+#     else:
+#         flag = False
+#     return flag
+
+
+def create_initial_data_series(owner):
+    HEADERS, INITIAL, _, _ = data_title_type_initial()
+    INITIAL[2] = owner
+    serial_number = serial_numbering(owner)
+    item = {serial_number: INITIAL}
+    return pd.DataFrame.from_dict(item, orient="index", columns=HEADERS).loc[serial_number]
+
+
+def ds_type_converter(ds):
+    HEADERS, _, TYPES, IS_MUST = data_title_type_initial()
+    type_warning = {}
+    for header, convert_type, must_flag in zip(HEADERS, TYPES, IS_MUST):
+        item, flag = type_converter(ds[header], convert_type)
+        if flag:
+            ds[header] = item
+        else:
+            ds[header] = None
+            type_warning[header] = "Type_Convert_Error"
+        if must_flag and ds[header] == "":
+            type_warning[header] = "No Data"
+    return ds, type_warning
+
+
+def type_converter(item, convert_type):
+    ret = ""
+    if convert_type in [str, int, float]:
+        try:
+            ret = convert_type(item)
+            flag = True
+        except:
+            flag = False
+    elif convert_type == datetime.date:
+        if item == "None" or item == "" or item is None:
+            ret = "None"
+            flag = True
+        else:
+            try:
+                s = item
+                print(s)
+                if "-" in s:
+                    s = s.split("-")
+                elif "/" in s:
+                    s = s.split("/")
+                s = [int(si) for si in s]
+                ret = datetime.date(*s)
+                flag = True
+            except:
+                flag = False
+    return ret, flag
+
+
+def data_title_type_initial():
+    HEADERS = ["Name", "Parent_ID", "Owner", "Status", "Order", "Request",
+               "Plan_Begin_Date", "Plan_End_Date", "Total_Estimate_Hour",
+               "Actual_Begin_Date", "Actual_End_Date", "Actual_Hour",
+               "Color", "Goal", "Difficulty", "Memo", 
+               "Num_Active_Children", "Last_Update"]
+
+    TYPES = [str, str, str, str, float, str,
+             datetime.date, datetime.date, float,
+             datetime.date, datetime.date, float,
+             str, str, str, str,
+             int, datetime.date]
+
+    INITIAL = ["", None, "Administrator", "TODO", 99, "Yes",
+               None, None, 0,
+               None, None, 0,
+               "Cyan", "", "", "",
+               0, datetime.date.today()]
     
-    flag = True
-    if idx not in df.index.tolist():
-        df.loc[idx, :] = new_items
-    elif exist_ok:
-        df.loc[idx, :] = new_items
-    else:
-        flag = False
-    return flag
+    IS_MUST = [True, True, True, True, True, True,
+               False, False, True,
+               False, False, False,
+               True, False, False, False,
+               True, True]
+    
+    return HEADERS, INITIAL, TYPES, IS_MUST
+
 
 if __name__ == "__main__":
 
@@ -69,26 +154,7 @@ if __name__ == "__main__":
     CREATE_SAMPLE = True
     if CREATE_SAMPLE:
 
-        # Project & Task
-        HEADERS = ["Name", "Parent_ID", "Owner", "Status", "Order", "Request",
-                   "Plan_Begin_Date", "Plan_End_Date", "Total_Estimate_Hour",
-                   "Actual_Begin_Date", "Actual_End_Date", "Actual_Hour",
-                   "Color", "Goal", "Difficulty", "Memo", 
-                   "Num_Active_Children", "Last_Update"]
-                   
-
-        TYPES = [str, str, str, str, int, str,
-                 datetime.date, datetime.date, float,
-                 datetime.date, datetime.date, float,
-                 str, str, str, str,
-                 int, datetime.date]
-
-        INITIAL = [None, None, "Administrator", "TODO", 0, "Yes",
-                   None, None, 0,
-                   None, None, 0,
-                   "Cyan", "Please Input", "", "",
-                   0, datetime.date.today()]
-
+        HEADERS, INITIAL, TYPES, IS_MUST = create_initial_data_series()
         print(f"{len(HEADERS)=}")
         print(f"{len(TYPES)=}")
         print(f"{len(INITIAL)=}")
@@ -96,7 +162,7 @@ if __name__ == "__main__":
         prj1 = []
         prj1.append(["Prj1_1", "0"] + INITIAL[2:])
         prj1.append(["Prj1_2", "0"] + INITIAL[2:])
-        prj1 = {numbering_item(c[0:3]): c for c in prj1}
+        prj1 = {serial_numbering(c[2]): c for c in prj1}
         prj1_ids = list(prj1.keys())
 
         prj2 = []
@@ -104,7 +170,7 @@ if __name__ == "__main__":
         prj2.append(["P2_2", prj1_ids[0]] + INITIAL[2:])
         prj2.append(["P2_1", prj1_ids[1]] + INITIAL[2:])
         prj2.append(["P2_2", prj1_ids[1]] + INITIAL[2:])
-        prj2 = {list_to_hash_w_ms(c[0:3]): c for c in prj2}
+        prj2 = {serial_numbering(c[2]): c for c in prj2}
         prj2_ids = list(prj2.keys())
 
         prj3 = []
@@ -113,7 +179,7 @@ if __name__ == "__main__":
         prj3.append(["P3_3", prj2_ids[1]]  + INITIAL[2:])
         prj3.append(["P3_2", prj2_ids[0]]  + INITIAL[2:])
         prj3.append(["P3_1", prj2_ids[2]]  + INITIAL[2:])
-        prj3 = {list_to_hash_w_ms(c[0:3]): c for c in prj3}
+        prj3 = {serial_numbering(c[2]): c for c in prj3}
         prj3_ids = list(prj3.keys())
 
         prj4 = []
@@ -122,7 +188,7 @@ if __name__ == "__main__":
         prj4.append(["Breakfast", prj3_ids[1]] + INITIAL[2:])
         prj4.append(["P4_2", prj3_ids[0]] + INITIAL[2:])
         prj4.append(["P4_1", prj3_ids[2]] + INITIAL[2:])
-        prj4 = {list_to_hash_w_ms(c[0:3]): c for c in prj4}
+        prj4 = {serial_numbering(c[2]): c for c in prj4}
         prj4_ids = list(prj4.keys())
 
         task = []
@@ -132,7 +198,7 @@ if __name__ == "__main__":
         task.append(["Salad", prj4_ids[1], "Administrator", "TODO", 0, "Yes", datetime.date(2025, 6, 1), datetime.date(2025, 8, 15), 40, None, None, 0, "Cyan", "Goal", "", "memo1", 0, datetime.date.today()])
         task.append(["Hamburger", prj4_ids[1], "Administrator", "TODO", 1, "Yes", datetime.date(2025, 7, 1), datetime.date(2025, 9, 30), 50, None, None, 0, "Cyan", "Goal", "", "memo1", 0, datetime.date.today()])
         task.append(["Fried Potato", prj4_ids[1], "Administrator", "TODO", 2, "Yes", datetime.date(2025, 8, 1), datetime.date(2025, 12, 1), 60, None, None, 0, "Cyan", "Goal", "", "memo1", 0, datetime.date.today()])
-        task = {list_to_hash_w_ms(t[0:3]): t for t in task}
+        task = {serial_numbering(t[2]): t for t in task}
         task_ids = list(task.keys())
 
         todo = []
@@ -142,7 +208,7 @@ if __name__ == "__main__":
         todo.append(["Chopped Onion", task_ids[4], "User", "TODO", 0, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
         todo.append(["Knead", task_ids[4], "User", "TODO", 1, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
         todo.append(["Bake", task_ids[4], "User", "TODO", 2, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
-        todo = {list_to_hash_w_ms(t[0:3]): t for t in todo}
+        todo = {serial_numbering(t[2]): t for t in todo}
         todo_ids = list(task.keys())
 
         SD = {}

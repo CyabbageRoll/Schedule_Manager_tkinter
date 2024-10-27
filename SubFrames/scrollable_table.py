@@ -6,26 +6,26 @@ from tkinter import ttk
 
 
 class ScrollableTable(tk.Frame):
-    def __init__(self, master, df, non_display_indices=[], widths=None, **kwargs):
+    def __init__(self, master, df, show="headings", non_display_indices=[], widths=None, **kwargs):
         super().__init__(master, **kwargs)
         # self.logger = master.logger
         # self.font = master.font
         self.df = df
         self.non_ids = non_display_indices
         self.set_variables()
-        self.set_widgets(widths)
+        self.set_widgets(widths, show)
         self.pack_widgets()
         self.set_init()
 
     def set_variables(self):
         pass
 
-    def set_widgets(self, widths):
+    def set_widgets(self, widths, show):
         # 作成したwidgetsは辞書の中に保管する
         self.w = OrderedDict()
         
         # Treeview 列名はデータフレームのカラム名。行やデータの中身はまだ設定しない
-        self.w["tree"] = ttk.Treeview(self, columns=self.df.columns.tolist(), show="headings")
+        self.w["tree"] = ttk.Treeview(self, columns=self.df.columns.tolist(), show=show)
         widths = [200] * self.df.shape[1] if widths is None else widths
         for c, w in zip(self.df.columns, widths):
             self.w["tree"].column(c, stretch=tk.YES, anchor="center", width=w)
@@ -65,11 +65,14 @@ class ScrollableTable(tk.Frame):
 
     # 内容を新しいデータフレームで更新
     def refresh(self, df, non_display_indices=[]):
-        del_ids = [idx for idx in self.df.index.tolist() if idx not in self.non_ids]
-        self.w["tree"].delete(*del_ids)
+        self.delete_current_items()
         self.df = df
         self.non_ids = non_display_indices
         self.set_init()
+
+    def delete_current_items(self):
+        del_ids = [idx for idx in self.df.index.tolist() if idx not in self.non_ids]
+        self.w["tree"].delete(*del_ids)
 
     # 選択行の取得
     def selection(self):
@@ -101,6 +104,5 @@ if __name__ == "__main__":
 
     test_tk.frame.selection_add(["R02", "R03", "R04"])
     ids = test_tk.frame.selection()
-    print(ids)
 
     test_tk.mainloop()
