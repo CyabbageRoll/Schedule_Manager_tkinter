@@ -6,8 +6,8 @@ import tkinter.font
 from tkinter import ttk
 
 # user
-import DataSettingRW as ds
-import MainFrames as mf
+import A_DataSettingRW as DS
+import B_MainFrames as mf
 import utils as ut
 
 
@@ -16,9 +16,9 @@ class ScheduleManager(tk.Tk):
         super().__init__()
         self.logger = ut.logger_settings()
         p_dir = os.path.dirname(os.path.dirname(__file__))
-        json_wr = ds.JSONReadWrite(p_dir, self.logger)
-        self.SP, self.GP, self.MEMO = json_wr.read()
-        self.SD = ds.read_schedule_data(self.SP.server_dir)
+        json_rw = DS.JSONReadWrite(p_dir, self.logger)
+        self.SP, self.GP, self.MEMO = json_rw.read()
+        self.SD = DS.read_schedule_data(self.SP.server_dir)
 
         self.tk_setting()
         self.set_frames()
@@ -34,7 +34,6 @@ class ScheduleManager(tk.Tk):
         s.configure('TNotebook.Tab', font=self.font)
         s.configure('Treeview', font=self.font)
         s.configure('Treeview.Heading', font=self.font)
-
 
     def set_frames(self):
         self.ob = mf.OptionBar(self, bg="#e09999", height=100, width=900)

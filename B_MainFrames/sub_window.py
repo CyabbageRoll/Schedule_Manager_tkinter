@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 from collections import OrderedDict
 # user
-import SubFrames as sf
-import MainFrames as mf
-import DataSettingRW as ds
+import A_DataSettingRW as ds
+import C_Tab01_DailyTable as tab1
+import C_Tab02_Project as tab2
+import C_Tab03_ProjectManage as tab3
+import C_Tab04_ScheduleTask as tab4
 
 
 class SubWindow(ttk.Notebook):
@@ -29,9 +31,11 @@ class SubWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Project-Manage"] = mf.ProjectManage(self, bg="#3333ee")
-        self.w["Daily"] = mf.DailyInformation(self, bg="#5555ee")
-        self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
+        # self.w["Schedule-Task"] = mf.ScheduleTask(self, bg="#ee5555")
+        self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")
+        self.w["Project-Manage"] = tab3.ProjectManage(self, bg="#3333ee")
+        self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
+        # self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
         self.w["Ticket"] = tk.Frame(self, bg="#2222ee")
         self.w["Team"] = tk.Frame(self, bg="#6666ee")
         self.w["Memo"] = tk.Frame(self, bg="#7777ee")

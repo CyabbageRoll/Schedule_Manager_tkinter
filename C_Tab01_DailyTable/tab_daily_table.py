@@ -3,7 +3,7 @@ import datetime
 import tkinter as tk
 import pandas as pd
 
-import SubFrames as sf
+import D_SubFrames as sf
 
 class DailyInformation(tk.Frame):
     def __init__(self, master, **kwargs):

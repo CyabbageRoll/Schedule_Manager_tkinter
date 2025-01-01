@@ -30,37 +30,18 @@ def save_schedule_data(SD, db_dir):
     SD["daily_info"].to_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
 
 
-# def list_to_hash_w_ms(input_list):
-#     str_list = [f"{si}" for si in input_list] + [datetime.datetime.now().strftime("%f")]
-#     s = "-".join(str_list)
-#     return hashlib.md5(s.encode()).hexdigest()[:10]
-
-
 def serial_numbering(owner):
     n = datetime.datetime.now().strftime("%y%m%d%f")
     n1, n2 = n[:6], n[6:]
     return n1 + "_" + hashlib.md5((n2 + owner).encode()).hexdigest()[:4]
 
 
-# def numbering_item(input_list):
-#     str_list = [f"{si}" for si in input_list]
-#     s = "-".join(str_list)
-#     md5 = hashlib.md5(s.encode()).hexdigest()[:5]
-#     dd = datetime.datetime.now().strftime("%y%m%d")
-#     return md5 + dd
+def pd_date(yyyy, mm, dd):
+    return pd.to_datetime(datetime.date(yyyy, mm, dd))
 
 
-# def add_list_to_df_last_row(df, new_items, exist_ok=False, idx=None):
-#     if not idx:
-#         idx = list_to_hash_w_ms(new_items[:3])
-#     flag = True
-#     if idx not in df.index.tolist():
-#         df.loc[idx, :] = new_items
-#     elif exist_ok:
-#         df.loc[idx, :] = new_items
-#     else:
-#         flag = False
-#     return flag
+def pd_today():
+    return pd.to_datetime(datetime.date.today())
 
 
 def create_initial_data_series(owner):
@@ -154,7 +135,7 @@ if __name__ == "__main__":
     CREATE_SAMPLE = True
     if CREATE_SAMPLE:
 
-        HEADERS, INITIAL, TYPES, IS_MUST = create_initial_data_series()
+        HEADERS, INITIAL, TYPES, IS_MUST = data_title_type_initial()
         print(f"{len(HEADERS)=}")
         print(f"{len(TYPES)=}")
         print(f"{len(INITIAL)=}")
@@ -207,7 +188,7 @@ if __name__ == "__main__":
         todo.append(["microwave", task_ids[1], "User", "TODO", 0, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
         todo.append(["Chopped Onion", task_ids[4], "User", "TODO", 0, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
         todo.append(["Knead", task_ids[4], "User", "TODO", 1, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
-        todo.append(["Bake", task_ids[4], "User", "TODO", 2, "Yes", None, None, 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
+        todo.append(["Bake", task_ids[4], "User", "TODO", 2, "Yes", None, datetime.date(2024, 12, 25), 3, None, None, 0, "Red", "Goal", "", "memo", 0, datetime.date.today()])
         todo = {serial_numbering(t[2]): t for t in todo}
         todo_ids = list(task.keys())
 

@@ -8,6 +8,7 @@ import os
 class SettingParametersLocal:
     server_dir: str = r"../DB_DIR"
     user: str = "User"
+    schedule_width = 10
     def __post_init__(self):
         pass
 
@@ -17,7 +18,8 @@ class SettingParametersServer:
     members: List[str] = field(default_factory=lambda: ["Member02", "Member03", "Member04", "Member05"])
     daily_begin_time: int = 6
     daily_end_time: int = 21
-
+    daily_task_hour: int = 5
+    schedule_draw_width: int = 10
 
 @dataclass
 class SettingParameters(SettingParametersServer, SettingParametersLocal):

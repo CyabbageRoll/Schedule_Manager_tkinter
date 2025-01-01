@@ -2,7 +2,7 @@ from collections import OrderedDict
 import tkinter as tk
 from tkinter import ttk
 
-import SubFrames as sf
+import D_SubFrames as sf
 
 
 class LabelBoxBase(tk.Frame):
@@ -147,7 +147,8 @@ class LabelEntryBox(LabelBoxBase):
 
     def warning_type_miss_match(self, event):
         if self.type_check():
-            self.w["Box"].configure(bg="SystemButtonFace")
+            # self.w["Box"].configure(bg="SystemButtonFace")
+            self.w["Box"].configure(bg="LightGrey")
         else:
             self.w["Box"].configure(bg="red")
 

@@ -1,8 +1,8 @@
 import tkinter as tk
 from collections import OrderedDict
 
-import SubFrames as sf
-
+import A_DataSettingRW as DS
+import D_SubFrames as sf
 
 class OptionBar(tk.Frame):
     def __init__(self, master, **kwargs):
@@ -33,13 +33,14 @@ class OptionBar(tk.Frame):
         self.w["save_button"] = tk.Button(self, text="Save", width=s, height=s, command=self.save_button, font=self.font)
         self.w["load_button"] = tk.Button(self, text="Load", width=s, height=s, command=self.load_button, font=self.font)
 
-
     def pack_widgets(self):
         for key, widget in self.w.items():
             widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def save_button(self):
-        pass
+        DS.save_schedule_data(self.SD, self.SP.server_dir)
+        self.logger.debug("save schedule data")
 
     def load_button(self):
-        pass
+        self.SD = DS.read_schedule_data(self.SP.server_dir)
+        self.logger.debug("read schedule data")
