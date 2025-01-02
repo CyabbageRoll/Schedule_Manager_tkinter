@@ -17,14 +17,30 @@ class SettingButtons(tk.Frame):
         self.pack_widgets()
         self.set_init()
         self.set_bind()
+        self.update_prj_combo_func = None
+        self.update_date_combo_func = None
 
     def set_variables(self):
-        pass
+        self.class_list = ["Project1", "Project2", "Project3", "Project4", "Task"]
+        self.class_dict = {k: i + 2 for i, k in enumerate(self.class_list)}
+        self.calender_list = ["Daily", "Weekly", "Monthly"]
 
     def set_widgets(self):
         self.w = OrderedDict()
+        self.w["prj_type"] = sf.LabelCombo(self, label_txt="Display Type",
+                                           label_width=15,
+                                           init_value="Task",
+                                           state="readonly",
+                                           combo_list=self.class_list)
+        self.w["date_type"] = sf.LabelCombo(self, label_txt="Calender Type",
+                                            label_width=15,
+                                            init_value="Daily",
+                                            state="readonly",
+                                            combo_list=self.calender_list)
         self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=10)
         self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=10)
+        self.w["color_label"] = tk.Label(self, text="BackColor", font=self.font)
+        self.w["color"] = sf.ColorSelector(self, init_color="Cornsilk")
 
     def pack_widgets(self):
         for k, widget in self.w.items():
@@ -36,10 +52,27 @@ class SettingButtons(tk.Frame):
         pass
 
     def set_bind(self):
-        pass
+        # up-down-boxのbindはそれぞれのクラスの中に定義されている
+        self.w["prj_type"].w["Box"].bind("<<ComboboxSelected>>", self.update_prj_combo)
+        self.w["date_type"].w["Box"].bind("<<ComboboxSelected>>", self.update_date_combo)
+
+    def update_prj_combo(self, event):
+        self.update_prj_combo_func()
+
+    def update_date_combo(self, event):
+        self.update_date_combo_func()
 
     def get_font_size(self):
         return self.w["font"].get()
 
     def get_width(self):
         return self.w["width"].get()
+    
+    def get_calender_type(self):
+        return self.w["date_type"].get()
+    
+    def get_prj_type(self):
+        return self.class_dict[self.w["prj_type"].get()]
+    
+    def get_bg_color(self):
+        return self.w["color"].get_as_hex()

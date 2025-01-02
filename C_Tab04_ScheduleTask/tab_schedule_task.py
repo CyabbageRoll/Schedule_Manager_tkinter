@@ -12,6 +12,7 @@ class ScheduleTask(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.GP = master.GP
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -36,12 +37,18 @@ class ScheduleTask(tk.Frame):
         self.set_bind()
 
     def set_bind(self):
-        self.w["inp_box"].w["font"].add_bind_func = self.update_func
-        self.w["inp_box"].w["width"].add_bind_func = self.update_func
+        self.w["inp_box"].update_prj_combo_func = lambda: self.update_func("prj")
+        self.w["inp_box"].update_date_combo_func = lambda: self.update_func("calender")
+        self.w["inp_box"].w["font"].add_bind_func = lambda: self.update_func("font")
+        self.w["inp_box"].w["width"].add_bind_func = lambda: self.update_func("width")
+        self.w["inp_box"].w["color"].add_bind_func = lambda: self.update_func("color")
 
-    def update_func(self, v):
-        font_size = self.w["inp_box"].get_font_size()
-        schedule_width = self.w["inp_box"].get_width()
-        self.SP.font_size = font_size
-        self.SP.schedule_width = schedule_width
-        self.w["schedule"].update(v)
+    def update_func(self, mode=None):
+        self.GP.font_size = int(self.w["inp_box"].get_font_size())
+        self.SP.schedule_width = int(self.w["inp_box"].get_width())
+        self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
+        if mode == "prj":
+            self.w["schedule"].w["area"].class_idx = self.w["inp_box"].get_prj_type()
+        if mode == "calender":
+            self.w["schedule"].w["area"].calender_type = self.w["inp_box"].get_calender_type()
+        self.w["schedule"].update(mode)

@@ -71,7 +71,7 @@ class UpDownBox(tk.Frame):
         self.value.set(value)
         self.current_value = value
         if self.add_bind_func is not None:
-            self.add_bind_func(self.get())
+            self.add_bind_func()
 
     def click_m(self):
         self.update_value(-1)

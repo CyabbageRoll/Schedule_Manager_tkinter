@@ -15,6 +15,7 @@ class MainWindow(ttk.Notebook):
         self.font = master.font
         self.SP = master.SP
         self.SD = master.SD
+        self.GP = master.GP
 
         self.set_variables()
         self.set_widgets()

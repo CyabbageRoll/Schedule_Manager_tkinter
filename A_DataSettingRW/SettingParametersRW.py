@@ -8,7 +8,7 @@ import os
 class SettingParametersLocal:
     server_dir: str = r"../DB_DIR"
     user: str = "User"
-    schedule_width = 10
+    schedule_width: int = 10
     def __post_init__(self):
         pass
 
@@ -30,14 +30,14 @@ class SettingParameters(SettingParametersServer, SettingParametersLocal):
 class GUIParametersLocal:
     window_width: int = 1500
     window_height: int =1000
-    font_size: int = 9
     font_family = "Meiryo"
+    font_size: int = 9
 
 
 @dataclass
 class GUIParametersServer:
     window_bg_color: str = "#9e9e8e"
-
+    schedule_bg_color: str = "#fff8dc"
 
 @dataclass
 class GUIParameters(GUIParametersServer, GUIParametersLocal):

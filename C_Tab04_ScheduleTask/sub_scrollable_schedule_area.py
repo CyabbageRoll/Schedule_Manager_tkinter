@@ -10,6 +10,7 @@ class ScrollableScheduleArea(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.GP = master.GP
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -69,8 +70,8 @@ class ScrollableScheduleArea(tk.Frame):
             self.last_x = event.x
             self.last_y = event.y
 
-    def update(self, v):
-        self.w["area"].update(v)
+    def update(self, mode):
+        self.w["area"].update(mode)
 
 
 

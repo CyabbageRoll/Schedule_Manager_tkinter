@@ -9,6 +9,7 @@ class ColorSelector(tk.Frame):
         self.logger = master.logger
         self.font = master.font
         self.color_dict = generate_color_dict()
+        self.add_bind_func = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -38,7 +39,8 @@ class ColorSelector(tk.Frame):
             widget.pack(side=tk.LEFT, fill=f, expand=e)
 
     def set_init(self, init_color):
-        pass
+        self.display_color.set(init_color)
+        self.on_select(None)
 
     def set_bind(self):
         self.w["Combobox"].bind("<<ComboboxSelected>>", self.on_select)
@@ -46,6 +48,8 @@ class ColorSelector(tk.Frame):
     def on_select(self, event):
         color_str = self.get()
         self.update_label_color(color_str)
+        if self.add_bind_func:
+            self.add_bind_func()
 
     def update_label_color(self, color_str):
         if not color_str:
