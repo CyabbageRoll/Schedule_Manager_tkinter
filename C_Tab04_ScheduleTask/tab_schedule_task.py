@@ -20,21 +20,22 @@ class ScheduleTask(tk.Frame):
         self.set_bind()
 
     def set_variables(self):
-        pass
+        self.msg = tk.StringVar()
 
     def set_widgets(self):
         self.w = OrderedDict()
+        self.w["label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
         self.w["inp_box"] = tab4.SettingButtons(self)
         self.w["schedule"] = tab4.ScrollableScheduleArea(self)
 
     def pack_widgets(self):
         for k, widget in self.w.items():
             f = tk.BOTH
-            e = False if k == "inp_box" else True
+            e = True if k == "schedule" else False
             widget.pack(side=tk.TOP, fill=f, expand=e)
 
     def set_init(self):
-        self.set_bind()
+        self.msg.set("information")
 
     def set_bind(self):
         self.w["inp_box"].update_prj_combo_func = lambda: self.update_func("prj")
@@ -42,6 +43,7 @@ class ScheduleTask(tk.Frame):
         self.w["inp_box"].w["font"].add_bind_func = lambda: self.update_func("font")
         self.w["inp_box"].w["width"].add_bind_func = lambda: self.update_func("width")
         self.w["inp_box"].w["color"].add_bind_func = lambda: self.update_func("color")
+        self.w["schedule"].w["area"].label_update_func = self.set_label
 
     def update_func(self, mode=None):
         self.GP.font_size = int(self.w["inp_box"].get_font_size())
@@ -52,3 +54,9 @@ class ScheduleTask(tk.Frame):
         if mode == "calender":
             self.w["schedule"].w["area"].calender_type = self.w["inp_box"].get_calender_type()
         self.w["schedule"].update(mode)
+
+    def update(self, mode="both"):
+        self.w["schedule"].update(mode)
+
+    def set_label(self, txt):
+        self.msg.set(txt)

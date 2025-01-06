@@ -76,13 +76,15 @@ def type_converter(item, convert_type):
         except:
             flag = False
     elif convert_type == datetime.date:
-        if item == "None" or item == "" or item is None:
-            ret = "None"
+        if isinstance(item, datetime.date):
+            ret = item
+            flag = True 
+        elif item == "None" or item == "" or item is None:
+            ret = None
             flag = True
         else:
             try:
                 s = item
-                print(s)
                 if "-" in s:
                     s = s.split("-")
                 elif "/" in s:

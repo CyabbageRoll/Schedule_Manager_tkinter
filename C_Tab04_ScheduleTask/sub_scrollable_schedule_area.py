@@ -48,6 +48,7 @@ class ScrollableScheduleArea(tk.Frame):
 
     def set_bind(self):
         # Bind mouse drag events for scrolling
+        # return
         self.w["area"].w["canvas"].bind("<ButtonPress-1>", self.start_drag)
         self.w["area"].w["canvas"].bind("<B1-Motion>", self.do_drag)
 

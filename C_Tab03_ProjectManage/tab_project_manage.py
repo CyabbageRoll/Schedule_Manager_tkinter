@@ -16,6 +16,7 @@ class ProjectManage(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.add_bind_func = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -58,6 +59,10 @@ class ProjectManage(tk.Frame):
     def set_bind(self):
         pass
 
+    def update_func(self):
+        if self.add_bind_func is not None:
+            self.add_bind_func()
+
     def db_create(self):
         flag, items = self.get_correct_data_or_warning_msg()
         if not flag:
@@ -66,6 +71,7 @@ class ProjectManage(tk.Frame):
             ds, _, class_idx = items
             self.update_schedule_data(ds, class_idx)
             self.update_display_items()
+        self.update_func()
 
     def db_update(self):
         flag, items = self.get_correct_data_or_warning_msg()
@@ -76,6 +82,7 @@ class ProjectManage(tk.Frame):
             (_, _), _, ds.name = self.w["Selector"].get()
             self.update_schedule_data(ds, class_idx)
             self.update_display_items()
+        self.update_func()
 
     def db_delete(self):
         _, _, class_idx, current_idx = self.get_item_and_type_warning()
@@ -88,6 +95,7 @@ class ProjectManage(tk.Frame):
                 messagebox.showinfo("Information" ,"Unable to delete because project have children")
                 return
         self.SD[class_idx].drop(current_idx, inplace=True)
+        self.update_func()
 
     def print_type_warning(self, type_warning):
         msg = ""
@@ -104,6 +112,15 @@ class ProjectManage(tk.Frame):
 
     def update_schedule_data(self, ds, class_idx):
         self.SD[class_idx].loc[ds.name] = ds
+        pid = ds["Parent_ID"]
+
+        df = self.SD[class_idx]
+        indices = df[df["Parent_ID"] == pid].index
+        orders = df.loc[indices, "Order"]
+        orders = orders.sort_values()
+        for order, idx in enumerate(orders.index):
+            self.SD[class_idx].loc[idx, "Order"] = order
+
         self.logger.info(f"insert schedule data {ds.name}")
 
     def get_correct_data_or_warning_msg(self):
