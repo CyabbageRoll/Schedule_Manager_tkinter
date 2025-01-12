@@ -61,7 +61,7 @@ class DateInputBox(tk.Frame):
         self.logger.debug(f"date update {d} -> {self.selected_date}")
         self.update_display_date()
         if self.press_enter_callback is not None:
-            self.press_enter_callback()
+            self.press_enter_callback(self.get())
 
     def date2str(self, date):
         if isinstance(date, str):

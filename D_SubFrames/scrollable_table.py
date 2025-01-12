@@ -2,16 +2,18 @@ from collections import OrderedDict
 import tkinter as tk
 from tkinter import ttk
 
+
 # import pandas as pd
-
-
 class ScrollableTable(tk.Frame):
-    def __init__(self, master, df, show="headings", non_display_indices=[], widths=None, **kwargs):
+    def __init__(self, master, 
+                 df, show="headings", non_display_indices=[], widths=None, base_color="#bbbbbb",
+                 **kwargs):
         super().__init__(master, **kwargs)
         # self.logger = master.logger
         # self.font = master.font
         self.df = df
         self.non_ids = non_display_indices
+        self.base_color = base_color
         self.set_variables()
         self.set_widgets(widths, show)
         self.pack_widgets()
@@ -51,7 +53,8 @@ class ScrollableTable(tk.Frame):
         for idx in self.df.index:
             if idx in self.non_ids:
                 continue
-            self.w["tree"].insert("", "end", iid=idx, values=self.df.loc[idx, :].tolist())
+            self.w["tree"].insert("", "end", iid=idx, values=self.df.loc[idx, :].tolist(), tag=idx)
+            self.w["tree"].tag_configure(idx, background=self.base_color)
 
     # 一つのセルの値を更新する
     def update_cell(self, index, column, value):
@@ -80,6 +83,12 @@ class ScrollableTable(tk.Frame):
 
     def selection_add(self, ids):
         self.w["tree"].selection_add(*ids)
+
+    def set_cell_color(self, row, color):
+        if color == "base":
+            self.w["tree"].tag_configure(f"{row}", background=self.base_color)
+        else:
+            self.w["tree"].tag_configure(f"{row}", background=color)
 
 
 if __name__ == "__main__":

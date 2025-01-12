@@ -10,10 +10,11 @@ import D_SubFrames as sf
 
 
 class DateSelectorButton(tk.Frame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, date_update_callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
+        self.date_update_callback = date_update_callback
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -30,7 +31,7 @@ class DateSelectorButton(tk.Frame):
         self.w = OrderedDict()
         s = 1
         self.w["left_arrow"] = tk.Button(self, text="◀️", width=s, height=s, command=self.click_left, font=self.font)
-        self.w["date_box"] = sf.DateInputBox(self, press_enter_box=None, height=s)
+        self.w["date_box"] = sf.DateInputBox(self, press_enter_callback=self.date_update_callback, height=s)
         self.w["right_arrow"] = tk.Button(self, text="▶️", width=s, height=s, command=self.click_right, font=self.font)
         self.w["move_today"] = tk.Button(self, text="Today", width=s, height=s, command=self.click_today, font=self.font)
 
@@ -62,6 +63,8 @@ class DateSelectorButton(tk.Frame):
     def set_date(self, p_date):
         self.w["date_box"].selected_date = p_date
         self.w["date_box"].update_display_date()
+        if self.date_update_callback:
+            self.date_update_callback(p_date)
 
     # def str2date(str_date):
     #     date = datetime.datetime.strptime(str_date, "%Y/%m/%d")

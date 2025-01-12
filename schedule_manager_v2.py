@@ -4,6 +4,7 @@ import os
 import tkinter as tk
 import tkinter.font
 from tkinter import ttk
+import datetime
 
 # user
 import A_DataSettingRW as DS
@@ -19,11 +20,13 @@ class ScheduleManager(tk.Tk):
         json_rw = DS.JSONReadWrite(p_dir, self.logger)
         self.SP, self.GP, self.MEMO = json_rw.read()
         self.SD = DS.read_schedule_data(self.SP.server_dir)
+        self.OB = {"Member": self.SP.user, "Date": datetime.date.today().strftime(r"%Y-%m-%d")}
 
         self.tk_setting()
         self.set_frames()
         self.grid_frames()
         self.set_binds()
+        self.init()
 
     def tk_setting(self):
         self.font = tkinter.font.Font(self, family=self.GP.font_family, size=self.GP.font_size)
@@ -53,11 +56,26 @@ class ScheduleManager(tk.Tk):
 
     def set_binds(self):
         self.sw.w["Project-Manage"].add_bind_func = self.refresh
+        self.mw.w["Schedule-Task"].w["schedule"].click_bind_func = self.task_click
     
+    def task_click(self, class_idx, idx):
+        current_tab = self.sw.select()
+        if class_idx == 6:
+            if current_tab == ".!subwindow.!dailyinformation":
+                ds = self.SD[class_idx].loc[idx, :]
+                self.sw.w["Daily"].update_item(ds)
+
     def refresh(self):
         print("refresh")
         self.logger.debug("refresh")
         self.mw.w["Schedule-Task"].update()
+
+    def init(self):
+        # self.task_click(6, "250103_cb12")
+        # for key in self.SD:
+        #     print(key)
+        #     print(self.SD[key])
+        pass
 
 
 if __name__ == "__main__":

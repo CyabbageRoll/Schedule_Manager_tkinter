@@ -11,6 +11,7 @@ class ScrollableScheduleArea(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.click_bind_func = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -49,13 +50,17 @@ class ScrollableScheduleArea(tk.Frame):
     def set_bind(self):
         # Bind mouse drag events for scrolling
         # return
-        self.w["area"].w["canvas"].bind("<ButtonPress-1>", self.start_drag)
+        self.w["area"].w["canvas"].bind("<ButtonPress-1>", self.mouse_click)
         self.w["area"].w["canvas"].bind("<B1-Motion>", self.do_drag)
 
-    def start_drag(self, event):
-        # Save the last mouse position
+    def mouse_click(self, event):
         self.last_x = event.x
         self.last_y = event.y
+
+        item = self.w["area"].w["canvas"].find_withtag("current")
+        if item:
+            class_idx, idx = self.w["area"].on_canvas_items[item[0]]
+            self.click_bind_func(class_idx, idx)
 
     def do_drag(self, event):
         # Check if Control key is pressed

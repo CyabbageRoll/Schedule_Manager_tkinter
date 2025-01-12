@@ -4,7 +4,7 @@ from tkinter import ttk
 
 
 class UserSelector(tk.Frame):
-    def __init__(self, master, callback_dict={}, **kwargs):
+    def __init__(self, master, user_change_callback=None, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
@@ -13,7 +13,7 @@ class UserSelector(tk.Frame):
         self.SD = master.SD
         self.MEMO = master.MEMO
 
-        self.call_back_select_user = callback_dict.get("select_user", lambda : None)
+        self.user_change_callback = user_change_callback
 
         self.set_variables()
         self.set_widgets()
@@ -48,7 +48,8 @@ class UserSelector(tk.Frame):
         self.w["user_selector"].bind("<<ComboboxSelected>>", self.select_user)
 
     def select_user(self, event):
-        self.call_back_select_user(self.display_user.get())
+        if self.user_change_callback:
+            self.user_change_callback(self.display_user.get())
 
 
 
