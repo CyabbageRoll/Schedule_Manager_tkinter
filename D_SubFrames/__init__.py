@@ -6,7 +6,6 @@ from .label_with_box import *
 from .button_row import *
 from .color_selector import *
 from .project_selector import *
-from .project_manage_input import *
 from .up_down_int_box import *
 from .scrollable_table import *
 

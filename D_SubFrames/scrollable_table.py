@@ -5,7 +5,7 @@ from tkinter import ttk
 
 # import pandas as pd
 class ScrollableTable(tk.Frame):
-    def __init__(self, master, 
+    def __init__(self, master,
                  df, show="headings", non_display_indices=[], widths=None, base_color="#bbbbbb",
                  **kwargs):
         super().__init__(master, **kwargs)
@@ -58,11 +58,15 @@ class ScrollableTable(tk.Frame):
 
     # 一つのセルの値を更新する
     def update_cell(self, index, column, value):
+        if index not in self.df.index:
+            self.w["tree"].insert("", "end", iid=index, values=[None]*self.df.shape[1], tag=index)
         self.w["tree"].set(item=index, column=column, value=value)
         self.df.loc[index, column] = value
 
     # 一つの行の値を更新する
     def update_row(self, index, row_values):
+        if index not in self.df.index:
+            self.w["tree"].insert("", "end", iid=index, values=[None]*self.df.shape[1], tag=index)
         self.df.loc[index, :] = row_values
         self.w["tree"].item(item=index, values=row_values)
 

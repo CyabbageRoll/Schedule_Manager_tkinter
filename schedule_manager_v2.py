@@ -56,7 +56,7 @@ class ScheduleManager(tk.Tk):
 
     def set_binds(self):
         self.sw.w["Project-Manage"].add_bind_func = self.refresh
-        self.mw.w["Schedule-Task"].w["schedule"].click_bind_func = self.task_click
+        self.mw.w["Schedule"].w["schedule"].click_bind_func = self.task_click
     
     def task_click(self, class_idx, idx):
         current_tab = self.sw.select()
@@ -68,7 +68,7 @@ class ScheduleManager(tk.Tk):
     def refresh(self):
         print("refresh")
         self.logger.debug("refresh")
-        self.mw.w["Schedule-Task"].update()
+        self.mw.w["Schedule"].update()
 
     def init(self):
         # self.task_click(6, "250103_cb12")

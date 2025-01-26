@@ -7,6 +7,7 @@ import pandas as pd
 # user
 import D_SubFrames as sf
 import A_DataSettingRW as DS
+import C_Tab03_ProjectManage as tab3
 
 
 class ProjectManage(tk.Frame):
@@ -33,7 +34,7 @@ class ProjectManage(tk.Frame):
                    ["Update", self.db_update],
                    ["Delete", self.db_delete]]
         self.w["ButtonRow"] = sf.ButtonRow(self, buttons)
-        self.w["Input"] = sf.ProjectManageInput(self)
+        self.w["Input"] = tab3.ProjectManageInput(self)
 
     def pack_widgets(self):
         for k, widget in self.w.items():

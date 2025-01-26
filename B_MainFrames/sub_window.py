@@ -33,12 +33,9 @@ class SubWindow(ttk.Notebook):
     def set_widgets(self):
         self.w = OrderedDict()
         # self.w["Schedule-Task"] = mf.ScheduleTask(self, bg="#ee5555")
-        self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
         self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")
         self.w["Project-Manage"] = tab3.ProjectManage(self, bg="#3333ee")
-        # self.w["Task"] = mf.TaskCreator(self, bg="#4444ee")
-        self.w["Ticket"] = tk.Frame(self, bg="#2222ee")
-        self.w["Team"] = tk.Frame(self, bg="#6666ee")
+        self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
         self.w["Memo"] = tk.Frame(self, bg="#7777ee")
 
     def pack_widgets(self):

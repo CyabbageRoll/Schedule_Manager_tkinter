@@ -8,7 +8,7 @@ import D_SubFrames as sf
 
 
 class ProjectSelector(tk.Frame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, update_item=True, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger
         self.font = master.font
@@ -19,6 +19,7 @@ class ProjectSelector(tk.Frame):
         self.class_dict = {f"P{i}": c for i, c in enumerate(self.class_list)}
         self.class2idx = {c: i for i, c in enumerate(self.class_list)}
         self.call_back_changed = self.call_back_none
+        self.update_item = update_item
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -49,7 +50,7 @@ class ProjectSelector(tk.Frame):
         self.w2 = OrderedDict()
         self.w2["Text1"] = tk.Label(self, text="")
         self.w2["Text2"] = tk.Label(self, text="Select if Update", font=self.font)
-        
+            
         self.w3 = OrderedDict()
         self.w3["Idx"] = sf.LabelCombo(self, label_txt="index", label_width=20, state="disabled")
         self.w3["ClearButton"] = tk.Button(self, text="Clear", command=self.clear_button_press, font=self.font)
@@ -61,12 +62,12 @@ class ProjectSelector(tk.Frame):
                 prj_k = k
                 break
             widget.pack(side=tk.TOP, fill=tk.X, expand=False)
-        for k, widget in self.w2.items():
-            widget.pack(side=tk.TOP, fill=tk.X, expand=False)
-
-        self.w1[prj_k].pack(side=tk.TOP, fill=tk.X, expand=False)
-        # self.w3["Idx"].pack(side=tk.TOP, fill=tk.X, expand=False)
-        self.w3["ClearButton"].pack(side=tk.TOP, fill=tk.NONE, expand=False)
+        
+        if self.update_item:
+            for k, widget in self.w2.items():
+                widget.pack(side=tk.TOP, fill=tk.X, expand=False)
+            self.w1[prj_k].pack(side=tk.TOP, fill=tk.X, expand=False)
+            self.w3["ClearButton"].pack(side=tk.TOP, fill=tk.NONE, expand=False)
 
     def pack_forget_widgets(self):
         for w in [self.w1, self.w2, self.w3]:
