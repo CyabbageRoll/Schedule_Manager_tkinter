@@ -1,12 +1,14 @@
 # default
+import random
 from collections import OrderedDict
 import tkinter as tk
 import datetime
 # additional
 import pandas as pd
 # user
-from A_DataSettingRW import type_converter, serial_numbering
+from A_DataSettingRW import type_converter, serial_numbering, create_initial_data_series
 import D_SubFrames as sf
+
 
 class ATT(tk.Frame):
     def __init__(self, master, **kwargs):
@@ -16,6 +18,7 @@ class ATT(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.click_apply_bind = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -40,6 +43,7 @@ class ATT(tk.Frame):
                                                      ["DELETE", self.button_delete],
                                                      ["🔼", self.button_up],
                                                      ["🔽", self.button_down],
+                                                     ["PULL", self.button_pull],
                                                      ])
         self.w["input"] = tk.Text(self, font=self.font)
 
@@ -54,9 +58,10 @@ class ATT(tk.Frame):
         self.w["selector"].prj_select_changed(None, 0)
 
     def project_select_changed(self, parent, selected_class, idx):
+        self.parent = parent
         self.msg.set(f"{parent=}, {selected_class=}, {idx=}")
-        class_idx = self.w["selector"].class2idx[selected_class]
-        df = self.SD[class_idx+1]
+        self.class_idx = self.w["selector"].class2idx[selected_class] + 1
+        df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == parent[0]]
         df = df[["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour"]]
         self.update_table_contents(df)
@@ -84,7 +89,29 @@ class ATT(tk.Frame):
         pass
 
     def button_apply(self):
-        pass
+        df = self.w["table"].df
+        if self.parent[0] == "0":
+            color_dic = sf.generate_color_dict()
+            color = random.choice(list(color_dic.keys()))
+        else:
+            color = self.SD[self.class_idx-1].loc[self.parent[0], "Color"]
+        for idx in df.index:
+            if idx not in self.SD[self.class_idx].index:
+                # 新規アイテムは登録した情報を入れる
+                ds = create_initial_data_series(self.SP.user)
+                for col in df.columns:
+                    ds[col] = df.loc[idx, col]
+                ds["Color"] = color
+                ds["Parent_ID"] = self.parent[0]
+                self.SD[self.class_idx].loc[ds.name] = ds
+            else:
+                # すでにあるitemは順序、工数、納期、開始日のみを書き換える
+                self.SD[self.class_idx].loc[idx, "Order"] = df.loc[idx, "Order"]
+                self.SD[self.class_idx].loc[idx, "Total_Estimate_Hour"] = df.loc[idx, "Total_Estimate_Hour"]
+                self.SD[self.class_idx].loc[idx, "Plan_Begin_Date"] = df.loc[idx, "Plan_Begin_Date"]
+                self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
+        # update
+        self.click_apply_bind()
 
     def button_add(self):
         inputs = self.w["input"].get("1.0", "end")
@@ -96,8 +123,15 @@ class ATT(tk.Frame):
                 continue
             if item["Error"] is None:
                 index = serial_numbering(self.SP.user)
-                print(self.df.max(axis=0)["Order"])
-                item["Order"] += int(self.w["table"].df.max(axis=0)["Order"])
+                max_order = self.df.max(axis=0)["Order"]
+                max_order = max_order if max_order else 0
+                item["Order"] += int(max_order)
+                for header in self.df.columns:
+                    self.w["table"].update_cell(index, header, item[header])
+            elif item["Error"] == "Name Exists":
+                # 名前がすでにある場合
+                df = self.w["table"].df
+                index = df[df["Name"] == item["Name"]].index[0]
                 for header in self.df.columns:
                     self.w["table"].update_cell(index, header, item[header])
             else:
@@ -106,9 +140,17 @@ class ATT(tk.Frame):
         self.update_input_area(user_txt_list=msg)
 
     def parse_string(self, s):
-        s = s.split(",")
-        if len(s) < 4:
-            return None
+        default_values = [1, "", ""]
+        s = [si.replace(" ", "") for si in s.split(",")]
+        s = s + default_values[len(s)-1:]
+
+        if not len(s):
+            return
+        if s[0] == "":
+            return
+        if s[1] == "":
+            s[1] = 0.25
+
         item = {"Order": 1,
                 "Name": s[0],
                 "Total_Estimate_Hour": s[1],
@@ -120,8 +162,7 @@ class ATT(tk.Frame):
         # 名前のダブりチェック
         names = self.w["table"].df["Name"].tolist()
         if item["Name"] in names:
-            item["Error"] = f"{item['Name']}はすでに存在します"
-            return item
+            item["Error"] = "Name Exists"
 
         # 時間チェック
         ret, flag = type_converter(item["Total_Estimate_Hour"], float)
@@ -158,3 +199,13 @@ class ATT(tk.Frame):
         df.loc[indices, "Order"] += c
         self.update_table_contents(df)
         self.w["table"].selection_add(indices)
+
+    def button_pull(self):
+        df = self.SD[self.class_idx]
+        df = df[df["Parent_ID"] == self.parent[0]]
+        
+        user_txt_list = []
+        for idx in df.index:
+            items = df.loc[idx, ["Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date"]].values
+            user_txt_list.append(", ".join(map(str, items)))
+        self.update_input_area(user_txt_list)

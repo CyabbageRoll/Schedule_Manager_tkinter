@@ -59,6 +59,10 @@ class ScheduleArea(tk.Frame):
         self.draw_corner()
 
     def update(self, mode=None):
+        """スケジュールエリアの更新
+        Args:
+            mode (str, optional): calender, width: カレンダの表示や幅を変える. prj: 描画するプロジェクトを更新. both: 両方. Defaults to None.
+        """
         self.unbind()
         self.refresh_canvas_and_parameters()
         if mode in ["both", "calender", "width"]:
@@ -233,7 +237,7 @@ class ScheduleArea(tk.Frame):
         for p_id, df in df_items.items():
             remaining_hour = 9999
             for idx in df.index:
-                estimate_hour = df.loc[idx, "Total_Estimate_Hour"]
+                estimate_hour = max(0.25, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
                 r1 = remaining_hour - df.loc[idx, "Total_Estimate_Hour"]
                 due_date = df.loc[idx, "Plan_End_Date"]
                 # [ ] 開始可能日が設定されている場合は、ここか次のcalculate_xで対応が必要

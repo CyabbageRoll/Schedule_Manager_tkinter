@@ -14,6 +14,7 @@ class DailyInformation(tk.Frame):
         self.SP = master.SP
         self.OB = master.OB
         self.column_name_list = [f"{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)]
+        self.daily_schedule_update_bind = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -67,6 +68,7 @@ class DailyInformation(tk.Frame):
         self.update_actual_hours(update_dict)
         items = self.update_local_df()
         self.update_table_items(items)
+        self.daily_schedule_update_bind()
 
     def update_daily_sch(self, rows, ds):
         # self.SDで保有しているdaily tableの更新(時間計算をする必要があるので、時間増分を計算)
