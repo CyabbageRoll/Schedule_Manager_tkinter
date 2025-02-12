@@ -67,6 +67,7 @@ class ProjectSelector(tk.Frame):
             for k, widget in self.w2.items():
                 widget.pack(side=tk.TOP, fill=tk.X, expand=False)
             self.w1[prj_k].pack(side=tk.TOP, fill=tk.X, expand=False)
+            self.w3["Idx"].pack(side=tk.TOP, fill=tk.X, expand=False)
             self.w3["ClearButton"].pack(side=tk.TOP, fill=tk.NONE, expand=False)
 
     def pack_forget_widgets(self):
@@ -161,3 +162,22 @@ class ProjectSelector(tk.Frame):
         class_idx = self.class2idx[selected_class]
         self.w1[f"P{class_idx}"].set("")
         self.prj_select_changed(None, class_idx)
+
+    def set(self, class_idx, idx):
+        self.logger.debug(f"project selector set {class_idx}, {idx}")
+        # 変更対象を選択
+        self.w1["Class_selector"].set(self.class_list[class_idx-1])
+        self.ids = [None] * 6
+        self.class_select_changed(event=None)
+        # 設定する項目の親をリスト化
+        if idx is None:
+            self.reset_values(class_idx)
+            self.reset_list_box()
+            return
+        ids = [idx]
+        for i in range(class_idx - 1):
+            ids.append(self.SD[class_idx - i].loc[ids[-1], "Parent_ID"])
+        # 順番に項目を設定
+        for i, idx in enumerate(ids[::-1]):
+            self.w1[f"P{i}"].set(self.SD[i + 1].loc[idx, "Name"])
+            self.prj_select_changed("", i)

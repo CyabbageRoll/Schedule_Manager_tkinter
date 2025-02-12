@@ -12,6 +12,8 @@ class ScrollableScheduleArea(tk.Frame):
         self.SP = master.SP
         self.GP = master.GP
         self.click_bind_func = None
+        self.edit_ticket_menu_click = None
+        self.edit_att_menu_click = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -51,6 +53,7 @@ class ScrollableScheduleArea(tk.Frame):
         # Bind mouse drag events for scrolling
         # return
         self.w["area"].w["canvas"].bind("<ButtonPress-1>", self.mouse_click)
+        self.w["area"].w["canvas"].bind("<ButtonPress-2>", self.mouse_click_right)
         self.w["area"].w["canvas"].bind("<B1-Motion>", self.do_drag)
 
     def mouse_click(self, event):
@@ -61,6 +64,21 @@ class ScrollableScheduleArea(tk.Frame):
         if item:
             class_idx, idx = self.w["area"].on_canvas_items[item[0]]
             self.click_bind_func(class_idx, idx)
+
+    def mouse_click_right(self, event):
+        item = self.w["area"].w["canvas"].find_withtag("current")
+        if not item:
+            return
+        class_idx, idx = self.w["area"].on_canvas_items[item[0]]
+        self.show_menu(event, class_idx, idx)
+
+    def show_menu(self, event, class_idx, idx):
+        # メニューを指定した位置に表示
+        popup_menu = tk.Menu(self, tearoff=0)
+        popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
+        popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
+        # popup_menu.add_separator()
+        popup_menu.post(event.x_root, event.y_root)
 
     def do_drag(self, event):
         # Check if Control key is pressed

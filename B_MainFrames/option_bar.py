@@ -14,6 +14,7 @@ class OptionBar(tk.Frame):
         self.SD = master.SD
         self.OB = master.OB
         self.MEMO = master.MEMO
+        self.refresh_bind_func = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -49,7 +50,9 @@ class OptionBar(tk.Frame):
     def date_update_callback(self, date):
         self.OB["Date"] = date
         self.logger.debug(f"update OB['date'] to {self.OB['Date']}")
+        self.refresh_bind_func()
 
     def user_change_callback(self, member):
         self.OB["Member"] = member
         self.logger.debug(f"update OB['Member'] to {self.OB['Member']}")
+        self.refresh_bind_func()

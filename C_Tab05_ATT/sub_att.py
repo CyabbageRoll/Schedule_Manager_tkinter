@@ -27,7 +27,7 @@ class ATT(tk.Frame):
 
     def set_variables(self):
         self.msg = tk.StringVar()
-        columns = ["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour"]
+        columns = ["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]
         rows = {i: [""]*len(columns) for i in range(1)}
         self.df = pd.DataFrame.from_dict(data=rows, columns=columns, orient="index")
 
@@ -63,7 +63,7 @@ class ATT(tk.Frame):
         self.class_idx = self.w["selector"].class2idx[selected_class] + 1
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == parent[0]]
-        df = df[["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour"]]
+        df = df[["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]]
         self.update_table_contents(df)
 
     def update_order_numbers(self, df):
@@ -71,6 +71,7 @@ class ATT(tk.Frame):
         orders = orders.sort_values()
         for order, idx in enumerate(orders.index):
             df.loc[idx, "Order"] = int(order)
+        df.loc[df["Status"] == "Regularly", "Order"] += 1000
         df = df.sort_values("Order")
         return df
 
@@ -80,7 +81,8 @@ class ATT(tk.Frame):
         self.update_input_area()
 
     def update_input_area(self, user_txt_list=[""]):
-        txt = ["新しい項目を追加するにはカンマ区切りで、名前, 工数, 開始日, 納期を入力してください。名前と工数は必須。開始日と納期はない場合は空白を入力してください。1行目(この行)は無視されます)"]
+        txt = ["新しい項目を追加するにはカンマ区切りで、《名前, 工数, 開始日, 納期, Memo, Status》 を入力してください。名前と工数は必須。開始日,納期,Status,Memoがない場合は空白を入力してください。",
+               "StatusはデフォルトでToDoになります。Rと入力するとRegularlyになります。最初の2行は無視されるので、3行目から入力してください。"]
         txt += user_txt_list
         self.w["input"].delete('1.0', 'end')
         self.w["input"].insert("1.0", "\n".join(txt))
@@ -90,6 +92,8 @@ class ATT(tk.Frame):
 
     def button_apply(self):
         df = self.w["table"].df
+        print(f"{df=}")
+        print(f"{self.SD[self.class_idx]=}")
         if self.parent[0] == "0":
             color_dic = sf.generate_color_dict()
             color = random.choice(list(color_dic.keys()))
@@ -103,34 +107,38 @@ class ATT(tk.Frame):
                     ds[col] = df.loc[idx, col]
                 ds["Color"] = color
                 ds["Parent_ID"] = self.parent[0]
-                self.SD[self.class_idx].loc[ds.name] = ds
+                self.SD[self.class_idx].loc[idx] = ds
             else:
                 # すでにあるitemは順序、工数、納期、開始日のみを書き換える
                 self.SD[self.class_idx].loc[idx, "Order"] = df.loc[idx, "Order"]
                 self.SD[self.class_idx].loc[idx, "Total_Estimate_Hour"] = df.loc[idx, "Total_Estimate_Hour"]
                 self.SD[self.class_idx].loc[idx, "Plan_Begin_Date"] = df.loc[idx, "Plan_Begin_Date"]
                 self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
+                self.SD[self.class_idx].loc[idx, "Status"] = df.loc[idx, "Status"]
+                self.SD[self.class_idx].loc[idx, "Memo"] = df.loc[idx, "Memo"]
         # update
         self.click_apply_bind()
 
     def button_add(self):
         inputs = self.w["input"].get("1.0", "end")
         inputs = inputs.split("\n")
-        parse_inputs = [self.parse_string(s) for s in inputs[1:]]
+        parse_inputs = [self.parse_string(s) for s in inputs[2:]]
         msg = []
-        for inp, item in zip(inputs[1:], parse_inputs):
+        df = self.w["table"].df
+        for inp, item in zip(inputs[2:], parse_inputs):
             if item is None:
                 continue
             if item["Error"] is None:
                 index = serial_numbering(self.SP.user)
-                max_order = self.df.max(axis=0)["Order"]
+                max_order = df["Order"].max(axis=0)
                 max_order = max_order if max_order else 0
-                item["Order"] += int(max_order)
-                for header in self.df.columns:
+                item["Order"] += float(max_order)
+                if item["Status"] == "Regularly":
+                    item["Order"] += 1000
+                for header in df.columns:
                     self.w["table"].update_cell(index, header, item[header])
             elif item["Error"] == "Name Exists":
                 # 名前がすでにある場合
-                df = self.w["table"].df
                 index = df[df["Name"] == item["Name"]].index[0]
                 for header in self.df.columns:
                     self.w["table"].update_cell(index, header, item[header])
@@ -140,7 +148,7 @@ class ATT(tk.Frame):
         self.update_input_area(user_txt_list=msg)
 
     def parse_string(self, s):
-        default_values = [1, "", ""]
+        default_values = [1, "", "", "", "", ""]
         s = [si.replace(" ", "") for si in s.split(",")]
         s = s + default_values[len(s)-1:]
 
@@ -157,6 +165,8 @@ class ATT(tk.Frame):
                 "Plan_Begin_Date": s[2],
                 "Plan_End_Date": s[3],
                 "Actual_Hour": 0,
+                "Memo": s[4],
+                "Status": s[5],
                 "Error": None}
 
         # 名前のダブりチェック
@@ -182,6 +192,14 @@ class ATT(tk.Frame):
                 if not date:
                     item["Error"] = f"{item[date_type]}が日付に変更できません"
                 item[date_type] = date
+
+        # Statusチェック
+        if item["Status"] == "" or item["Status"] == "T":
+            item["Status"] = "ToDo"
+        elif item["Status"] == "R":
+            item["Status"] = "Regularly"
+        else:
+            item["Error"] = f"Statusが不正です"
         return item
 
     def button_delete(self):
@@ -206,6 +224,9 @@ class ATT(tk.Frame):
         
         user_txt_list = []
         for idx in df.index:
-            items = df.loc[idx, ["Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date"]].values
+            items = df.loc[idx, ["Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Status", "Memo"]].values
             user_txt_list.append(", ".join(map(str, items)))
         self.update_input_area(user_txt_list)
+
+    def set(self, class_idx, idx):
+        self.w["selector"].set(class_idx, idx)

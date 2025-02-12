@@ -140,7 +140,7 @@ class ScheduleArea(tk.Frame):
         self.w["canvas"].create_line(self.x00, y0, self.x00 + 1000, y0,
                                      fill=self.color_dict[ds_p["Color"]],
                                      width=self.dy + 2)
-        item_idx = self.w["canvas"].create_text(self.x00, y0, 
+        item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
                                                 font=(self.GP.font_family, self.GP.font_size + 5))

@@ -39,16 +39,18 @@ class DailyInformation(tk.Frame):
         for k in self.SD["daily_info"].columns:
             input_rows[k] = ["combobox", [k, [], "normal"]]
         self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
-
+        # 入力した予定の取り消し
+        self.w["Buttons"] = sf.ButtonRow(self, buttons=[["Free", self.delete_item]])
         # 1日の予定入力欄
         self.w["table"] = sf.ScrollableTable(self, df=self.df, widths=[100, 250, 250])
 
     def pack_widgets(self):
         self.w["Info_area"].pack(side=tk.TOP, fill=tk.X, expand=False)
+        self.w["Buttons"].pack(side=tk.TOP, fill=tk.X, expand=False)
         self.w["table"].pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def set_init(self):
-        pass
+        self.refresh()
 
     def selection(self):
         return self.w["table"].selection()
@@ -70,11 +72,15 @@ class DailyInformation(tk.Frame):
         self.update_table_items(items)
         self.daily_schedule_update_bind()
 
+    def delete_item(self):
+        ds = pd.Series([""], name="")
+        self.update_item(ds)
+
     def update_daily_sch(self, rows, ds):
         # self.SDで保有しているdaily tableの更新(時間計算をする必要があるので、時間増分を計算)
-        d = self.OB["Date"]
-        if d not in self.SD["daily_sch"].index:
-            self.SD["daily_sch"].loc[d, :] = ""
+        d = str(self.OB["Date"]) + "-" + self.OB["Member"]
+        # if d not in self.SD["daily_sch"].index:
+        #     self.SD["daily_sch"].loc[d, :] = ""
         cols = [self.column_name_list[row] for row in rows]
         current_item = self.SD["daily_sch"].loc[d, cols]
         self.SD["daily_sch"].loc[d, cols] = ds.name
@@ -92,9 +98,11 @@ class DailyInformation(tk.Frame):
             self.SD[6].loc[idx, "Actual_Hour"] += h
 
     def update_local_df(self):
-        d = self.OB["Date"]
-        ds = self.SD["daily_sch"].loc[d, :]
+        d = str(self.OB["Date"]) + "-" + self.OB["Member"]
+        if d not in self.SD["daily_sch"].index:
+            self.SD["daily_sch"].loc[d, :] = ""
 
+        ds = self.SD["daily_sch"].loc[d, :]
         items = [["", "", "", ""] for _ in range(24*4)]
         for i in range(24*4):
             idx = ds.iloc[i]
@@ -104,13 +112,14 @@ class DailyInformation(tk.Frame):
             info = self.get_item_info(idx)
             color = self.SD[6].loc[idx, "Color"]
             items[i] = (idx, item_name, info, color)
-        
+
         current_idx = ""
         same_count = 0
         for i in range(24*4):
             previous_idx = current_idx
             current_idx = items[i][0]
             if not current_idx:
+                self.df.iloc[i, 1] = ""
                 continue
             
             if previous_idx != current_idx:
@@ -124,6 +133,7 @@ class DailyInformation(tk.Frame):
             if same_count > 1:
                 self.df.iloc[i, 1] = "↑"
             same_count += 1
+
         return items
 
     def get_item_info(self, idx):
@@ -144,4 +154,7 @@ class DailyInformation(tk.Frame):
             else:
                 self.w["table"].set_cell_color(row, color="base")
 
-
+    def refresh(self):
+        self.logger.debug("refresh")
+        items = self.update_local_df()
+        self.update_table_items(items)

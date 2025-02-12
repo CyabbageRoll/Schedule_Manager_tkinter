@@ -21,6 +21,7 @@ class SettingParametersServer:
     daily_task_hour: int = 5
     schedule_draw_width: int = 10
 
+
 @dataclass
 class SettingParameters(SettingParametersServer, SettingParametersLocal):
     pass
@@ -38,6 +39,7 @@ class GUIParametersLocal:
 class GUIParametersServer:
     window_bg_color: str = "#9e9e8e"
     schedule_bg_color: str = "#fff8dc"
+
 
 @dataclass
 class GUIParameters(GUIParametersServer, GUIParametersLocal):

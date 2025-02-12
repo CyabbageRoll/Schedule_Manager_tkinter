@@ -96,6 +96,7 @@ class ProjectManage(tk.Frame):
                 messagebox.showinfo("Information" ,"Unable to delete because project have children")
                 return
         self.SD[class_idx].drop(current_idx, inplace=True)
+        self.set(0, None)
         self.update_func()
 
     def print_type_warning(self, type_warning):
@@ -171,3 +172,6 @@ class ProjectManage(tk.Frame):
 
     def update_display_items(self):
         self.w["Selector"].update_list_box()
+
+    def set(self, class_idx, idx):
+        self.w["Selector"].set(class_idx, idx)

@@ -59,7 +59,18 @@ class ScheduleManager(tk.Tk):
         self.sw.w["Daily"].daily_schedule_update_bind = self.refresh
         self.mw.w["Schedule"].w["schedule"].click_bind_func = self.task_click
         self.mw.w["ATT"].click_apply_bind = self.refresh
-    
+        self.mw.w["Schedule"].w["schedule"].edit_ticket_menu_click = self.edit_ticket
+        self.mw.w["Schedule"].w["schedule"].edit_att_menu_click = self.edit_att
+        self.ob.refresh_bind_func = self.refresh
+
+    def edit_ticket(self, class_idx, idx):
+        self.sw.w["Project-Manage"].set(class_idx, idx)
+        self.sw.select(self.sw.w["Project-Manage"])
+
+    def edit_att(self, class_idx, idx):
+        self.mw.w["ATT"].set(class_idx, idx)
+        self.mw.select(self.mw.w["ATT"])
+
     def task_click(self, class_idx, idx):
         current_tab = self.sw.select()
         if class_idx == 6:
@@ -68,9 +79,18 @@ class ScheduleManager(tk.Tk):
                 self.sw.w["Daily"].update_item(ds)
 
     def refresh(self):
-        print("refresh")
         self.logger.debug("refresh")
         self.mw.w["Schedule"].update()
+        self.sw.w["Projects-Display"].refresh_button_press()
+        self.mw.w["Projects-Display"].refresh_button_press()
+        self.sw.w["Daily"].refresh()
+        # self.w["Project-Manage"].refresh()
+        # self.w["ATT"].refresh()
+
+        # self.w["Goals/Reflections"].refresh()
+        # self.w["Team"].refresh()
+        # self.w["Regularly"].refresh()
+        # self.w["Follows"].refresh()
 
     def init(self):
         # self.task_click(6, "250103_cb12")

@@ -33,8 +33,8 @@ class MainWindow(ttk.Notebook):
     def set_widgets(self):
         self.w = OrderedDict()
         # self.w["Project-Manage"] = mf.ProjectManage(self, bg="#3333ee")
-        self.w["ATT"] = tab5.ATT(self, bg="#ee5555")
         self.w["Schedule"] = tab4.ScheduleTask(self)
+        self.w["ATT"] = tab5.ATT(self, bg="#ee5555")
         self.w["Projects-Display"] = tab2.ProjectDisplay(self)
         
         self.w["Goals/Reflections"] = tk.Frame(self, bg="#ee5555")
