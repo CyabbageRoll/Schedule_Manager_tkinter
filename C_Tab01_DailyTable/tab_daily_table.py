@@ -1,6 +1,7 @@
 from collections import OrderedDict, defaultdict
 import datetime
 import tkinter as tk
+from tkinter import messagebox
 import pandas as pd
 
 import D_SubFrames as sf
@@ -15,10 +16,12 @@ class DailyInformation(tk.Frame):
         self.OB = master.OB
         self.column_name_list = [f"{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)]
         self.daily_schedule_update_bind = None
+        self.daily_info_update_bind = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
         self.set_init()
+        self.set_bind()
         self.logger.debug("initialized Daily Table Tab")
 
     def set_variables(self):
@@ -37,7 +40,7 @@ class DailyInformation(tk.Frame):
         self.w = OrderedDict()
         input_rows = {}
         for k in self.SD["daily_info"].columns:
-            input_rows[k] = ["combobox", [k, [], "normal"]]
+            input_rows[k] = ["combobox", ["", [], "normal"]]
         self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
         # 入力した予定の取り消し
         self.w["Buttons"] = sf.ButtonRow(self, buttons=[["Free", self.delete_item]])
@@ -78,12 +81,10 @@ class DailyInformation(tk.Frame):
 
     def update_daily_sch(self, rows, ds):
         # self.SDで保有しているdaily tableの更新(時間計算をする必要があるので、時間増分を計算)
-        d = str(self.OB["Date"]) + "-" + self.OB["Member"]
-        # if d not in self.SD["daily_sch"].index:
-        #     self.SD["daily_sch"].loc[d, :] = ""
+        df_idx = self.generate_df_idx()
         cols = [self.column_name_list[row] for row in rows]
-        current_item = self.SD["daily_sch"].loc[d, cols]
-        self.SD["daily_sch"].loc[d, cols] = ds.name
+        current_item = self.SD["daily_sch"].loc[df_idx, cols]
+        self.SD["daily_sch"].loc[df_idx, cols] = ds.name
 
         update_dict = defaultdict(float)
         update_dict[ds.name] = len(rows) * 0.25
@@ -98,11 +99,11 @@ class DailyInformation(tk.Frame):
             self.SD[6].loc[idx, "Actual_Hour"] += h
 
     def update_local_df(self):
-        d = str(self.OB["Date"]) + "-" + self.OB["Member"]
-        if d not in self.SD["daily_sch"].index:
-            self.SD["daily_sch"].loc[d, :] = ""
+        df_idx = self.generate_df_idx()
+        if df_idx not in self.SD["daily_sch"].index:
+            self.SD["daily_sch"].loc[df_idx, :] = ""
 
-        ds = self.SD["daily_sch"].loc[d, :]
+        ds = self.SD["daily_sch"].loc[df_idx, :]
         items = [["", "", "", ""] for _ in range(24*4)]
         for i in range(24*4):
             idx = ds.iloc[i]
@@ -158,3 +159,55 @@ class DailyInformation(tk.Frame):
         self.logger.debug("refresh")
         items = self.update_local_df()
         self.update_table_items(items)
+        self.set_info_values()
+        self.calc_working_hours()
+
+    def set_bind(self):
+        for k in self.SD["daily_info"].columns:
+            self.w["Info_area"].w[k].w["Box"].bind("<Return>", lambda x, k=k: self.info_item_update_bind_func(k, x))
+            self.w["Info_area"].w[k].w["Box"].bind("<FocusOut>", lambda x, k=k: self.info_item_update_bind_func(k, x))
+
+    def info_item_update_bind_func(self, k, event):
+        if self.OB["Member"] != self.SP.user:
+            messagebox.showinfo("Information", "You can't update other member's information")
+            return
+        txt = self.w["Info_area"].w[k].get()
+        df_idx = self.generate_df_idx()
+        self.SD["daily_info"].loc[df_idx, k] = txt
+        self.daily_info_update_bind()
+
+    def generate_df_idx(self):
+        return str(self.OB["Date"]) + "-" + self.OB["Member"]
+    
+    def set_info_values(self):
+        df_idx = self.generate_df_idx()
+        for k in self.SD["daily_info"].columns:
+            v = self.SD["daily_info"].loc[df_idx, k] if df_idx in self.SD["daily_info"].index else ""
+            if v == v:
+                self.w["Info_area"].set(k, v)
+
+    def calc_working_hours(self):
+        df_idx = self.generate_df_idx()
+        if df_idx not in self.SD["daily_sch"].index:
+            return
+        ds = self.SD["daily_sch"].loc[df_idx, :]
+        working_hours, working_break = 0, 0
+        working_from, working_to_idx = "", 0
+        break_tmp = 0
+        for i, dddd in enumerate(self.column_name_list):
+            if ds[dddd]:
+                working_hours += 0.25
+                working_break += break_tmp
+                break_tmp = 0
+                working_to_idx = i
+                if not working_from:
+                    working_from = dddd
+            elif working_from:
+                break_tmp += 0.25
+        if working_hours:
+            working_to_idx = working_to_idx + 1 if working_to_idx + 1 < len(self.column_name_list) else 0
+            self.SD["daily_sch"].loc[df_idx, "TOTAL"] = working_hours
+            self.SD["daily_sch"].loc[df_idx, "FROM"] = working_from
+            self.SD["daily_sch"].loc[df_idx, "TO"] = self.column_name_list[working_to_idx]
+            self.SD["daily_sch"].loc[df_idx, "BREAK"] = working_break
+        

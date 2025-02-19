@@ -74,6 +74,9 @@ class LabelCombo(LabelBoxBase):
 
     def get_list(self):
         return self.w["Box"]["values"]
+    
+    def get(self):
+        return self.w["Box"].get()
 
 
 class LabelDateInputBox(LabelBoxBase):
@@ -179,7 +182,6 @@ class LabelEntryBox(LabelBoxBase):
             return False
 
 
-
 class InputListArea(tk.Frame):
     def __init__(self, master, input_rows, label_width, **kwargs):
         """
@@ -204,7 +206,7 @@ class InputListArea(tk.Frame):
         self.w = OrderedDict()
         for label_txt, (item_type, items) in input_rows.items():
             if item_type == "combobox":
-                self.w[label_txt] = LabelCombo(self, 
+                self.w[label_txt] = LabelCombo(self,
                                                label_txt=label_txt, 
                                                init_value=items[0], 
                                                combo_list=items[1],

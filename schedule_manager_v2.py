@@ -57,6 +57,7 @@ class ScheduleManager(tk.Tk):
     def set_binds(self):
         self.sw.w["Project-Manage"].add_bind_func = self.refresh
         self.sw.w["Daily"].daily_schedule_update_bind = self.refresh
+        self.sw.w["Daily"].daily_info_update_bind = self.refresh
         self.mw.w["Schedule"].w["schedule"].click_bind_func = self.task_click
         self.mw.w["ATT"].click_apply_bind = self.refresh
         self.mw.w["Schedule"].w["schedule"].edit_ticket_menu_click = self.edit_ticket
@@ -84,11 +85,11 @@ class ScheduleManager(tk.Tk):
         self.sw.w["Projects-Display"].refresh_button_press()
         self.mw.w["Projects-Display"].refresh_button_press()
         self.sw.w["Daily"].refresh()
+        self.mw.w["Team"].refresh()
         # self.w["Project-Manage"].refresh()
         # self.w["ATT"].refresh()
 
         # self.w["Goals/Reflections"].refresh()
-        # self.w["Team"].refresh()
         # self.w["Regularly"].refresh()
         # self.w["Follows"].refresh()
 
