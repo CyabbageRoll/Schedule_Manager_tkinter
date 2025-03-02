@@ -14,7 +14,7 @@ class DailyInformation(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.OB = master.OB
-        self.column_name_list = [f"{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)]
+        self.column_name_list = [f"C{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)]
         self.daily_schedule_update_bind = None
         self.daily_info_update_bind = None
         self.set_variables()
@@ -206,8 +206,8 @@ class DailyInformation(tk.Frame):
                 break_tmp += 0.25
         if working_hours:
             working_to_idx = working_to_idx + 1 if working_to_idx + 1 < len(self.column_name_list) else 0
-            self.SD["daily_sch"].loc[df_idx, "TOTAL"] = working_hours
-            self.SD["daily_sch"].loc[df_idx, "FROM"] = working_from
-            self.SD["daily_sch"].loc[df_idx, "TO"] = self.column_name_list[working_to_idx]
-            self.SD["daily_sch"].loc[df_idx, "BREAK"] = working_break
+            self.SD["daily_sch"].loc[df_idx, "CTOTAL"] = working_hours
+            self.SD["daily_sch"].loc[df_idx, "CFROM"] = working_from
+            self.SD["daily_sch"].loc[df_idx, "CTO"] = self.column_name_list[working_to_idx]
+            self.SD["daily_sch"].loc[df_idx, "CBREAK"] = working_break
         

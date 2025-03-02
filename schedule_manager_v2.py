@@ -21,7 +21,6 @@ class ScheduleManager(tk.Tk):
         self.SP, self.GP, self.MEMO = json_rw.read()
         self.SD = DS.read_schedule_data(self.SP.server_dir)
         self.OB = {"Member": self.SP.user, "Date": datetime.date.today().strftime(r"%Y-%m-%d")}
-
         self.tk_setting()
         self.set_frames()
         self.grid_frames()

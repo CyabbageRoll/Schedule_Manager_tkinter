@@ -216,7 +216,7 @@ class ScheduleArea(tk.Frame):
         p_ids = set(self.SD[self.class_idx-1].index.tolist())
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
         df = self.SD[self.class_idx]
-        df = df[df["Status"] == "TODO"]
+        df = df[df["Status"] == "ToDo"]
         # [ ] task以外の場合 所有者が自分でない場合も表示する必要があるので対応が必要
         df = df[df["Owner"] == self.owner]
         df_items = {p_id: df[df["Parent_ID"] == p_id] for p_id in p_ids}

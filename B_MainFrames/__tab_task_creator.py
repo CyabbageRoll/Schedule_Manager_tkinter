@@ -64,7 +64,7 @@ class TaskCreator(tk.Frame):
             widget.pack(side=tk.TOP, fill=f, expand=e)
 
     def set_init(self):
-        self.w["task"].set_list("Status", ["TODO", "WIP", "DONE", "STORE", "CANCELED"])
+        self.w["task"].set_list("Status", ['ToDo', 'Done', 'Cancel', 'Regularly'])
         idx = self.SD[5].index[0]
         self.set_values_from_task_idx(idx)
 

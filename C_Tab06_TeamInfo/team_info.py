@@ -64,13 +64,13 @@ class TeamInfo(tk.Frame):
         if df_idx not in self.SD["daily_sch"].index:
             return ""
         
-        ds = self.SD["daily_sch"].loc[df_idx, ["TOTAL", "FROM", "TO", "BREAK"]]
-        if not ds["TOTAL"]:
+        ds = self.SD["daily_sch"].loc[df_idx, ["CTOTAL", "CFROM", "CTO", "CBREAK"]]
+        if not ds["CTOTAL"]:
             return ""
         
-        work_from = f'{ds["FROM"][:2]}:{ds["FROM"][2:]}'
-        work_to = f'{ds["TO"][:2]}:{ds["TO"][2:]}'
-        return f" {work_from} ~ {work_to}, {ds['TOTAL']}h, ({ds['BREAK']}h)"
+        work_from = f'{ds["CFROM"][:2]}:{ds["CFROM"][2:]}'
+        work_to = f'{ds["CTO"][:2]}:{ds["CTO"][2:]}'
+        return f" {work_from} ~ {work_to}, {ds['CTOTAL']}h, ({ds['CBREAK']}h)"
 
     def fetch_info_overwork(self, user_name):
         df_idx = str(self.OB["Date"]) + "-" + user_name

@@ -41,7 +41,7 @@ class ProjectManageInput(tk.Frame):
                                         combo_list=[self.SP.user] + self.SP.members)
         self.w["Status"] = sf.LabelCombo(self, label_txt="Status", label_width=20, state="readonly",
                                          combo_list=["ToDo", "Done", "Cancel", "Regularly"])
-        self.w["Order"] = sf.LabelEntryBox(self, label_txt="Order", label_width=20, input_type="float")
+        self.w["OrderValue"] = sf.LabelEntryBox(self, label_txt="OrderValue", label_width=20, input_type="float")
         self.w["Parent_ID"] = sf.LabelCombo(self, label_txt="Parent ID", label_width=20, state="disable")
         self.w["Parent_Name"] = sf.LabelCombo(self, label_txt="Parent Name", label_width=20, state="disable")
         self.w["Plan_Begin_Date"] = sf.LabelDateInputBox(self, label_txt="Plan Begin Date", label_width=20)

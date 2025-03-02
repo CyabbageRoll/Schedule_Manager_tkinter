@@ -27,7 +27,7 @@ class ATT(tk.Frame):
 
     def set_variables(self):
         self.msg = tk.StringVar()
-        columns = ["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]
+        columns = ["OrderValue", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]
         rows = {i: [""]*len(columns) for i in range(1)}
         self.df = pd.DataFrame.from_dict(data=rows, columns=columns, orient="index")
 
@@ -63,16 +63,16 @@ class ATT(tk.Frame):
         self.class_idx = self.w["selector"].class2idx[selected_class] + 1
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == parent[0]]
-        df = df[["Order", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]]
+        df = df[["OrderValue", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]]
         self.update_table_contents(df)
 
     def update_order_numbers(self, df):
-        orders = df.loc[:, "Order"]
+        orders = df.loc[:, "OrderValue"]
         orders = orders.sort_values()
         for order, idx in enumerate(orders.index):
-            df.loc[idx, "Order"] = int(order)
-        df.loc[df["Status"] == "Regularly", "Order"] += 1000
-        df = df.sort_values("Order")
+            df.loc[idx, "OrderValue"] = int(order)
+        df.loc[df["Status"] == "Regularly", "OrderValue"] += 1000
+        df = df.sort_values("OrderValue")
         return df
 
     def update_table_contents(self, df):
@@ -110,7 +110,7 @@ class ATT(tk.Frame):
                 self.SD[self.class_idx].loc[idx] = ds
             else:
                 # すでにあるitemは順序、工数、納期、開始日のみを書き換える
-                self.SD[self.class_idx].loc[idx, "Order"] = df.loc[idx, "Order"]
+                self.SD[self.class_idx].loc[idx, "Order"] = df.loc[idx, "OrderValue"]
                 self.SD[self.class_idx].loc[idx, "Total_Estimate_Hour"] = df.loc[idx, "Total_Estimate_Hour"]
                 self.SD[self.class_idx].loc[idx, "Plan_Begin_Date"] = df.loc[idx, "Plan_Begin_Date"]
                 self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
@@ -130,11 +130,11 @@ class ATT(tk.Frame):
                 continue
             if item["Error"] is None:
                 index = serial_numbering(self.SP.user)
-                max_order = df["Order"].max(axis=0)
+                max_order = df["OrderValue"].max(axis=0)
                 max_order = max_order if max_order else 0
-                item["Order"] += float(max_order)
+                item["OrderValue"] += float(max_order)
                 if item["Status"] == "Regularly":
-                    item["Order"] += 1000
+                    item["OrderValue"] += 1000
                 for header in df.columns:
                     self.w["table"].update_cell(index, header, item[header])
             elif item["Error"] == "Name Exists":
@@ -159,7 +159,7 @@ class ATT(tk.Frame):
         if s[1] == "":
             s[1] = 0.25
 
-        item = {"Order": 1,
+        item = {"OrderValue": 1,
                 "Name": s[0],
                 "Total_Estimate_Hour": s[1],
                 "Plan_Begin_Date": s[2],

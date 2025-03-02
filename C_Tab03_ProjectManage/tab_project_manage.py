@@ -118,10 +118,10 @@ class ProjectManage(tk.Frame):
 
         df = self.SD[class_idx]
         indices = df[df["Parent_ID"] == pid].index
-        orders = df.loc[indices, "Order"]
+        orders = df.loc[indices, "OrderValue"]
         orders = orders.sort_values()
         for order, idx in enumerate(orders.index):
-            self.SD[class_idx].loc[idx, "Order"] = order
+            self.SD[class_idx].loc[idx, "OrderValue"] = order
 
         self.logger.info(f"insert schedule data {ds.name}")
 
