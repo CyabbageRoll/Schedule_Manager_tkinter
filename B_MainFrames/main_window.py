@@ -8,7 +8,7 @@ import C_Tab03_ProjectManage as tab3
 import C_Tab04_ScheduleTask as tab4
 import C_Tab05_ATT as tab5
 import C_Tab06_TeamInfo as tab6
-
+import C_Tab07_Regularly as tab7
 
 class MainWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
@@ -34,20 +34,18 @@ class MainWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        # self.w["Project-Manage"] = mf.ProjectManage(self, bg="#3333ee")
-        self.w["Team"] = tab6.TeamInfo(self)
         self.w["Schedule"] = tab4.ScheduleTask(self)
-        self.w["ATT"] = tab5.ATT(self, bg="#ee5555")
+        self.w["Regularly"] = tab7.Regularly(self)
+        self.w["Team"] = tab6.TeamInfo(self)
+        self.w["ATT"] = tab5.ATT(self, bg="#555555")
         self.w["Projects-Display"] = tab2.ProjectDisplay(self)
-        
-        self.w["Goals/Reflections"] = tk.Frame(self, bg="#ee5555")
-        self.w["Regularly"] = tk.Frame(self, bg="#ee2222")
-        self.w["Follows"] = tk.Frame(self, bg="#ee5555")
+
+        self.w["Goals/Reflections"] = tk.Frame(self, bg="#555555")
+        self.w["Follows"] = tk.Frame(self, bg="#555555")
 
     def pack_widgets(self):
         for key, widget in self.w.items():
             self.add(widget, text=key)
-            # widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def save_button(self):
         pass

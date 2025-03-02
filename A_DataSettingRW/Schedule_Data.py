@@ -1,33 +1,122 @@
 import os
+from pathlib import Path
 from dataclasses import dataclass, asdict, field
 from typing import List
 import hashlib
 import datetime
 import pandas as pd
+import sqlite3
 
 
 def read_schedule_data(db_dir):
-    prj1 = pd.read_pickle(os.path.join(db_dir, "prj1_df.pkl"))
-    prj2 = pd.read_pickle(os.path.join(db_dir, "prj2_df.pkl"))
-    prj3 = pd.read_pickle(os.path.join(db_dir, "prj3_df.pkl"))
-    prj4 = pd.read_pickle(os.path.join(db_dir, "prj4_df.pkl"))
-    task = pd.read_pickle(os.path.join(db_dir, "task_df.pkl"))
-    todo = pd.read_pickle(os.path.join(db_dir, "todo_df.pkl"))
-    daily_sch = pd.read_pickle(os.path.join(db_dir, "daily_table_df.pkl"))
-    daily_info = pd.read_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
-    SD = {1: prj1, 2: prj2, 3: prj3, 4:prj4, 5: task, 6: todo, "daily_sch": daily_sch, "daily_info":daily_info}
+    # prj1 = pd.read_pickle(os.path.join(db_dir, "prj1_df.pkl"))
+    # prj2 = pd.read_pickle(os.path.join(db_dir, "prj2_df.pkl"))
+    # prj3 = pd.read_pickle(os.path.join(db_dir, "prj3_df.pkl"))
+    # prj4 = pd.read_pickle(os.path.join(db_dir, "prj4_df.pkl"))
+    # task = pd.read_pickle(os.path.join(db_dir, "task_df.pkl"))
+    # todo = pd.read_pickle(os.path.join(db_dir, "todo_df.pkl"))
+    # daily_sch = pd.read_pickle(os.path.join(db_dir, "daily_table_df.pkl"))
+    # daily_info = pd.read_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
+    prj_db_path = Path(db_dir) / "Projects.sqlite"
+    day_db_path = Path(db_dir) / "Daily.sqlite"
+    if not prj_db_path.exists():
+        create_new_prj_db()
+    if not day_db_path.exists():
+        create_new_daily_db()
+    SD = {}
+    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "todo"]
+    for i, table in enumerate(schedule_tables):
+        SD[i] = fetch_schedule_data(prj_db_path, table)
+
+    daily_tables = ["daily_sch", "daily_info"]
+    for table in daily_tables:
+        SD[table] = fetch_schedule_data(day_db_path, table)
     return SD
+# 注意点
+# 重複データの処理: to_sql()メソッドには重複データを無視するオプションはありませんが、SQLiteのテーブルにユニーク制約を設定することで、重複を防ぐことができます。
+# パフォーマンスの最適化: 大量のデータを挿入する場合、method='multi'オプションを使用すると、挿入速度が向上します。
+# df.to_sql('people', conn, if_exists='replace', index=False)
+# df.to_sql('people', conn, if_exists='append', index=False, method='multi')
+# conn.close()
 
 
 def save_schedule_data(SD, db_dir):
-    SD[1].to_pickle(os.path.join(db_dir, "prj1_df.pkl"))
-    SD[2].to_pickle(os.path.join(db_dir, "prj2_df.pkl"))
-    SD[3].to_pickle(os.path.join(db_dir, "prj3_df.pkl"))
-    SD[4].to_pickle(os.path.join(db_dir, "prj4_df.pkl"))
-    SD[5].to_pickle(os.path.join(db_dir, "task_df.pkl"))
-    SD[6].to_pickle(os.path.join(db_dir, "todo_df.pkl"))
-    SD["daily_sch"].to_pickle(os.path.join(db_dir, "daily_table_df.pkl"))
-    SD["daily_info"].to_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
+    # SD[1].to_pickle(os.path.join(db_dir, "prj1_df.pkl"))
+    # SD[2].to_pickle(os.path.join(db_dir, "prj2_df.pkl"))
+    # SD[3].to_pickle(os.path.join(db_dir, "prj3_df.pkl"))
+    # SD[4].to_pickle(os.path.join(db_dir, "prj4_df.pkl"))
+    # SD[5].to_pickle(os.path.join(db_dir, "task_df.pkl"))
+    # SD[6].to_pickle(os.path.join(db_dir, "todo_df.pkl"))
+    # SD["daily_sch"].to_pickle(os.path.join(db_dir, "daily_table_df.pkl"))
+    # SD["daily_info"].to_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
+    pass
+
+
+def fetch_schedule_data(db_path, table):
+    conn = sqlite3.connect(db_path)
+    query = f"SELECT * FROM {table} where Status in ('ToDo', 'Done', 'Cancel', 'Regularly')"
+    df_new = pd.read_sql_query(query, conn)
+    return df_new
+
+
+def create_new_prj_db(db_path):
+    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "todo"]
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        for table in schedule_tables:
+            sql_create_table = f"""
+                                CREATE TABLE IF NOT EXISTS {table} (
+                                    INDEX TEXT PRIMARY KEY,
+                                    Name TEXT,
+                                    Parent_ID TEXT,
+                                    Owner TEXT,
+                                    Status TEXT,
+                                    Order REAL,
+                                    Request TEXT,
+                                    Plan_Begin_Date TEXT,
+                                    Plan_End_Date TEXT,
+                                    Total_Estimate_Hour REAL,
+                                    Actual_Begin_Date TEXT,
+                                    Actual_End_Date TEXT,
+                                    Actual_Hour REAL,
+                                    Color TEXT,
+                                    Goal TEXT,
+                                    Difficulty TEXT,
+                                    Memo TEXT,
+                                    Num_Active_Children INTEGER,
+                                    Last_Update TEXT
+                                );
+                            """
+        cursor.execute(sql_create_table)
+        conn.commit()
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()
+
+
+def create_new_daily_db(db_path):
+    DAILY_TABLE = [f"{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)] + \
+                    ["TOTAL", "FROM", "TO", "BREAK"]
+    DAILY_ITEMS = ["Health", "Work_Place", "Safety", "OverWork", "Info1", "Info2", "Info3"]
+    daily_tables = ["daily_sch", "daily_info"]
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        for table in daily_tables:
+            sql_create_table = f"""
+                                CREATE TABLE IF NOT EXISTS {table} (
+                                    INDEX TEXT PRIMARY KEY,
+                                    """
+
+            pass
+    except Exception as e:
+        print(e)
+    finally:    
+        conn.close()
+
+    pass
 
 
 def serial_numbering(owner):
