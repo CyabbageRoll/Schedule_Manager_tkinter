@@ -11,9 +11,11 @@ class ScrollableRegularlyArea(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.click_bind_func = None
         self.edit_ticket_menu_click = None
         self.edit_att_menu_click = None
+        self.status_update = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -77,7 +79,11 @@ class ScrollableRegularlyArea(tk.Frame):
         popup_menu = tk.Menu(self, tearoff=0)
         popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
         popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
-        # popup_menu.add_separator()
+        popup_menu.add_separator()
+        popup_menu.add_command(label="DONE", command=lambda : self.status_update(class_idx, idx, "DONE"))
+        popup_menu.add_command(label="Cancel", command=lambda : self.status_update(class_idx, idx, "Cancel"))
+        popup_menu.add_command(label="Regularly", command=lambda : self.status_update(class_idx, idx, "Regularly"))
+        popup_menu.add_command(label="ToDo", command=lambda : self.status_update(class_idx, idx, "ToDo"))
         popup_menu.post(event.x_root, event.y_root)
 
     def do_drag(self, event):

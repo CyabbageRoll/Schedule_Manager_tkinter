@@ -12,6 +12,7 @@ class SettingButtons(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.GP = master.GP
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -29,18 +30,18 @@ class SettingButtons(tk.Frame):
         self.w = OrderedDict()
         self.w["prj_type"] = sf.LabelCombo(self, label_txt="Display Type",
                                            label_width=15,
-                                           init_value="Task",
+                                           init_value=self.SP.schedule_prj_type,
                                            state="readonly",
                                            combo_list=self.class_list)
         self.w["date_type"] = sf.LabelCombo(self, label_txt="Calender Type",
                                             label_width=15,
-                                            init_value="Daily",
+                                            init_value=self.SP.schedule_calender_type,
                                             state="readonly",
                                             combo_list=self.calender_list)
-        self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=10)
-        self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=10)
+        self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=self.GP.font_size)
+        self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=self.SP.schedule_width)
         self.w["color_label"] = tk.Label(self, text="BackColor", font=self.font)
-        self.w["color"] = sf.ColorSelector(self, init_color="Cornsilk")
+        self.w["color"] = sf.ColorSelector(self, init_color=self.GP.schedule_bg_color)
 
     def pack_widgets(self):
         for k, widget in self.w.items():

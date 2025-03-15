@@ -13,6 +13,7 @@ class Regularly(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()

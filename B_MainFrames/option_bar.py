@@ -14,7 +14,9 @@ class OptionBar(tk.Frame):
         self.SD = master.SD
         self.OB = master.OB
         self.MEMO = master.MEMO
+        self.json_rw = master.json_rw
         self.refresh_bind_func = None
+        self.get_memo_dict = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -42,10 +44,18 @@ class OptionBar(tk.Frame):
     def save_button(self):
         DS.save_schedule_data(self.SD, self.SP.server_dir)
         self.logger.debug("save schedule data")
+        self.get_memo_dict()
+        self.json_rw.write(self.SP.server_dir, SP=self.SP, GP=self.GP, MEMO=self.MEMO)
+        self.logger.debug("write json data")
+        self.load_button()
 
     def load_button(self):
         self.SD = DS.read_schedule_data(self.SP.server_dir)
         self.logger.debug("read schedule data")
+        SP, GP, MEMO = self.json_rw.read()
+        self.parameter_update(SP, GP, MEMO)
+        self.logger.debug("read json data")
+        self.refresh_bind_func()
 
     def date_update_callback(self, date):
         self.OB["Date"] = date
@@ -56,3 +66,11 @@ class OptionBar(tk.Frame):
         self.OB["Member"] = member
         self.logger.debug(f"update OB['Member'] to {self.OB['Member']}")
         self.refresh_bind_func()
+
+    def parameter_update(self, SP, GP, MEMO):
+        for var in vars(SP):
+            setattr(self.SP, var, getattr(SP, var))
+        for var in vars(GP):
+            setattr(self.GP, var, getattr(GP, var))
+        self.MEMO["Memo"] = MEMO["Memo"]
+        

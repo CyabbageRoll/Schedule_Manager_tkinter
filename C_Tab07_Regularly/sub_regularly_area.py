@@ -14,6 +14,7 @@ class RegularlyArea(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.class_idx = 6
         self.owner = master.SP.user
         self.undraw_p_ids = set()
@@ -180,7 +181,7 @@ class RegularlyArea(tk.Frame):
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
         df = self.SD[self.class_idx]
         df = df[df["Status"] == "Regularly"]
-        df = df[df["Owner"] == self.owner]
+        df = df[df["Owner"] == self.OB["Member"]]
         df_items = {p_id: df[df["Parent_ID"] == p_id] for p_id in p_ids}
         return df_items
 

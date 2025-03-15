@@ -9,7 +9,9 @@ class ColorSelector(tk.Frame):
         self.logger = master.logger
         self.font = master.font
         self.color_dict = generate_color_dict()
+        self.color_dict_to_name = {v: k for k, v in self.color_dict.items()}
         self.add_bind_func = None
+        init_color = init_color if init_color[0] != "#" else self.color_dict_to_name[init_color]
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()

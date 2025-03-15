@@ -20,6 +20,8 @@ class SettingParametersServer:
     daily_end_time: int = 21
     daily_task_hour: int = 5
     schedule_draw_width: int = 10
+    schedule_prj_type: str = "Task"
+    schedule_calender_type: str = "Daily"
 
 
 @dataclass
@@ -53,43 +55,44 @@ class JSONReadWrite:
 
     def read(self):
         # localに置いている設定データの読み込み
-        tmp_local = self._read_json(self.local_dir)
+        tmp_local = self._read_json(self.local_dir, "setting.json")
         assert tmp_local is not None, "'config.json was not FOUND'"
         SPL = SettingParametersLocal(**tmp_local["Setting"])
         GPL = GUIParametersLocal(**tmp_local["GUI"])
         # サーバーに置いている設定データの読み込み
-        tmp_server = self._read_json(SPL.server_dir)
+        tmp_server = self._read_json(SPL.server_dir, f"setting_{SPL.user}.json")
         if tmp_server is None:
             SPS = SettingParametersServer()
             GPS = GUIParametersServer()
-            MEMO = self._white_memo()
         else:
             SPS = SettingParametersServer(**tmp_server["Setting"])
             GPS = GUIParametersServer(**tmp_server["GUI"])
-        MEMO = self._read_json(SPL.server_dir)
+        MEMO = self._read_json(SPL.server_dir, "memo.json")
+        if MEMO is None:
+            MEMO = self._white_memo()
         SP = SettingParameters(**vars(SPL), **vars(SPS))
         GP = GUIParameters(**vars(GPL), **vars(GPS))
         return SP, GP, MEMO
 
-    def _read_json(self, p_dir):
-        file_name = os.path.join(p_dir, "setting.json")
+    def _read_json(self, p_dir, file_name):
+        file_name = os.path.join(p_dir, file_name)
         if not os.path.exists(file_name):
             return None
         with open(file_name, encoding="UTF-8") as f:
             tmp = json.load(f)
-        print
         return tmp
 
     def write(self, server_dir, SP=None, GP=None, MEMO=None):
+        print(MEMO)
         if MEMO is not None:
-            self._write_json(server_dir, MEMO)
+            self._write_json(server_dir, "memo.json", MEMO)
         if SP is not None and GP is not None:
             PL, PS = self._arrange_parameters(SP, GP)
-            self._write_json(SP.server_dir, PS)
-            self._write_json(self.local_dir, PL)
+            self._write_json(SP.server_dir, f"setting_{SP.user}.json", PS)
+            self._write_json(self.local_dir, "setting.json", PL)
 
-    def _write_json(self, p_dir, save_item):
-        file_name = os.path.join(p_dir, "setting.json")
+    def _write_json(self, p_dir, file_name, save_item):
+        file_name = os.path.join(p_dir, file_name)
         with open(file_name, 'w', encoding="UTF-8") as f:
             json.dump(save_item, f, indent=4, ensure_ascii=False)
 

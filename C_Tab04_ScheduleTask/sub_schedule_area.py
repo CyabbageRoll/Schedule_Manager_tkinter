@@ -15,8 +15,8 @@ class ScheduleArea(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.class_idx = 6
-        self.calender_type = "Daily"
         self.owner = master.SP.user
         self.undraw_p_ids = set()
         self.width_scale = 10
@@ -90,7 +90,8 @@ class ScheduleArea(tk.Frame):
         if item:
             class_idx, idx = self.on_canvas_items[item[0]]
             name = self.SD[class_idx].loc[idx, "Name"]
-            msg = f"{idx} : {name} {event.y}"
+            memo = self.SD[class_idx].loc[idx, "Memo"].replace("\n", " ")
+            msg = f"{idx} : {name} - {memo}"
             self.label_update_func(msg)
 
     def on_leave(self, event):
@@ -100,7 +101,6 @@ class ScheduleArea(tk.Frame):
         print("canvas is clicked")
         canvas = event.widget
         x, y = event.x, event.y
-        print(x, y)
         item = canvas.find_closest(event.x, event.y)
         print(f"Clicked on item with text: {item}")
 
@@ -108,7 +108,6 @@ class ScheduleArea(tk.Frame):
         x, y = event.x, event.y
         msg = f"{x}, {y}"
         self.label_update_func(msg)
-        print(x, y)
 
     def set_project(self):
         pass
@@ -163,7 +162,7 @@ class ScheduleArea(tk.Frame):
         for x0, x1, idx in schedule_items:
             ds = df.loc[idx]
             y0 += self.dy
-            order_idx = f"[{int(ds['Order'])}]"
+            order_idx = f"[{int(ds['OrderValue'])}]"
             due_date = f" : ({ds['Plan_End_Date']})" if ds["Plan_End_Date"] else ""
             hours = f" : {ds['Actual_Hour']}/{ds['Total_Estimate_Hour']} [hr]"
             text = f" {order_idx} {ds['Name']}" + hours + due_date
@@ -203,7 +202,7 @@ class ScheduleArea(tk.Frame):
                            "Weekly": datetime.timedelta(weeks=1),
                            "Monthly": relativedelta(months=1)
                            }
-        time_delta = time_delta_dict[self.calender_type]
+        time_delta = time_delta_dict[self.SP.schedule_calender_type]
         dd = datetime.date.today()
         for _ in range(self.max_columns):
             x1 = x0 + w
@@ -217,15 +216,15 @@ class ScheduleArea(tk.Frame):
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
         df = self.SD[self.class_idx]
         df = df[df["Status"] == "ToDo"]
-        # [ ] task以外の場合 所有者が自分でない場合も表示する必要があるので対応が必要
-        df = df[df["Owner"] == self.owner]
+        # [ ] task以外の場合 所有者が選択しているメンバーでない場合も表示する必要があるので対応が必要
+        df = df[df["Owner"] == self.OB["Member"]]
         df_items = {p_id: df[df["Parent_ID"] == p_id] for p_id in p_ids}
         return df_items
 
     # 並び替えて、日付をdatetime64に変換
     def arrange_df_with_order(self, df_items):
         for p_id, df in df_items.items():
-            df = df.sort_values(by="Order", ascending=False)
+            df = df.sort_values(by="OrderValue", ascending=False)
             for c in ["Plan_Begin_Date", "Plan_End_Date"]:
                 df[c] = pd.to_datetime(df[c])
             df_items[p_id] = df
@@ -254,7 +253,7 @@ class ScheduleArea(tk.Frame):
         all_schedule_items = defaultdict(list)
         x0, x1 = self.x00, self.x00
         column_days = {"Daily": 1, "Weekly": 5, "Monthly": 20}
-        width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.calender_type])
+        width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.SP.schedule_calender_type])
         for _, idx, p_id, estimate_hour in self.idx_remaining_hour:
             x1 += estimate_hour * width_scale
             all_schedule_items[p_id].append((x0, x1, idx))

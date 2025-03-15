@@ -13,6 +13,7 @@ class ScheduleTask(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -49,10 +50,15 @@ class ScheduleTask(tk.Frame):
         self.GP.font_size = int(self.w["inp_box"].get_font_size())
         self.SP.schedule_width = int(self.w["inp_box"].get_width())
         self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
+        print(self.GP)
         if mode == "prj":
-            self.w["schedule"].w["area"].class_idx = self.w["inp_box"].get_prj_type()
+            prj_type = self.w["inp_box"].get_prj_type()
+            self.SP.schedule_prj_type = prj_type
+            self.w["schedule"].w["area"].class_idx = prj_type
         if mode == "calender":
-            self.w["schedule"].w["area"].calender_type = self.w["inp_box"].get_calender_type()
+            calender_type = self.w["inp_box"].get_calender_type()
+            self.SP.schedule_calender_type = calender_type
+            self.w["schedule"].w["area"].calender_type = calender_type
         self.w["schedule"].update(mode)
 
     def update(self, mode="both"):

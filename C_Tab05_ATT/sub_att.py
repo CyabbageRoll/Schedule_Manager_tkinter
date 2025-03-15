@@ -110,7 +110,7 @@ class ATT(tk.Frame):
                 self.SD[self.class_idx].loc[idx] = ds
             else:
                 # すでにあるitemは順序、工数、納期、開始日のみを書き換える
-                self.SD[self.class_idx].loc[idx, "Order"] = df.loc[idx, "OrderValue"]
+                self.SD[self.class_idx].loc[idx, "OrderValue"] = df.loc[idx, "OrderValue"]
                 self.SD[self.class_idx].loc[idx, "Total_Estimate_Hour"] = df.loc[idx, "Total_Estimate_Hour"]
                 self.SD[self.class_idx].loc[idx, "Plan_Begin_Date"] = df.loc[idx, "Plan_Begin_Date"]
                 self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
@@ -131,7 +131,8 @@ class ATT(tk.Frame):
             if item["Error"] is None:
                 index = serial_numbering(self.SP.user)
                 max_order = df["OrderValue"].max(axis=0)
-                max_order = max_order if max_order else 0
+                max_order = max_order if max_order and max_order == max_order else 0
+                self.logger.debug(f"{max_order=}")
                 item["OrderValue"] += float(max_order)
                 if item["Status"] == "Regularly":
                     item["OrderValue"] += 1000
@@ -164,7 +165,7 @@ class ATT(tk.Frame):
                 "Total_Estimate_Hour": s[1],
                 "Plan_Begin_Date": s[2],
                 "Plan_End_Date": s[3],
-                "Actual_Hour": 0,
+                "Actual_Hour": 0.0,
                 "Memo": s[4],
                 "Status": s[5],
                 "Error": None}
@@ -214,7 +215,7 @@ class ATT(tk.Frame):
     def change_order(self, c):
         indices = [idx for idx in self.w["table"].selection()]
         df = self.w["table"].df
-        df.loc[indices, "Order"] += c
+        df.loc[indices, "OrderValue"] += c
         self.update_table_contents(df)
         self.w["table"].selection_add(indices)
 

@@ -17,8 +17,8 @@ class ScheduleManager(tk.Tk):
         super().__init__()
         self.logger = ut.logger_settings()
         p_dir = os.path.dirname(os.path.dirname(__file__))
-        json_rw = DS.JSONReadWrite(p_dir, self.logger)
-        self.SP, self.GP, self.MEMO = json_rw.read()
+        self.json_rw = DS.JSONReadWrite(p_dir, self.logger)
+        self.SP, self.GP, self.MEMO = self.json_rw.read()
         self.SD = DS.read_schedule_data(self.SP.server_dir)
         self.OB = {"Member": self.SP.user, "Date": datetime.date.today().strftime(r"%Y-%m-%d")}
         self.tk_setting()
@@ -61,9 +61,12 @@ class ScheduleManager(tk.Tk):
         self.mw.w["Schedule"].w["schedule"].click_bind_func = self.task_click
         self.mw.w["Schedule"].w["schedule"].edit_ticket_menu_click = self.edit_ticket
         self.mw.w["Schedule"].w["schedule"].edit_att_menu_click = self.edit_att
+        self.mw.w["Schedule"].w["schedule"].status_update = self.status_update
         self.mw.w["Regularly"].w["regularly"].click_bind_func = self.task_click
         self.mw.w["Regularly"].w["regularly"].edit_ticket_menu_click = self.edit_ticket
         self.mw.w["Regularly"].w["regularly"].edit_att_menu_click = self.edit_att
+        self.mw.w["Regularly"].w["regularly"].status_update = self.status_update
+        self.ob.get_memo_dict = self.mw.w["Memo"].get_to_memo_dict
         self.ob.refresh_bind_func = self.refresh
 
     def edit_ticket(self, class_idx, idx):
@@ -81,6 +84,10 @@ class ScheduleManager(tk.Tk):
                 ds = self.SD[class_idx].loc[idx, :]
                 self.sw.w["Daily"].update_item(ds)
 
+    def status_update(self, class_idx, idx, status):
+        self.SD[class_idx].loc[idx, "Status"] = status
+        self.refresh()
+
     def refresh(self):
         self.logger.debug("refresh")
         self.mw.w["Schedule"].update()
@@ -93,7 +100,6 @@ class ScheduleManager(tk.Tk):
         # self.w["ATT"].refresh()
 
         # self.w["Goals/Reflections"].refresh()
-        # self.w["Regularly"].refresh()
         # self.w["Follows"].refresh()
 
     def init(self):

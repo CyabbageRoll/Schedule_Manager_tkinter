@@ -35,7 +35,7 @@ class SubWindow(ttk.Notebook):
         self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
         self.w["Project-Manage"] = tab3.ProjectManage(self, bg="#3333ee")
         self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")
-        self.w["Memo"] = tk.Frame(self, bg="#777777")
+        
 
     def pack_widgets(self):
         for key, widget in self.w.items():

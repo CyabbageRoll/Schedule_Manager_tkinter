@@ -19,7 +19,7 @@ def read_schedule_data(db_dir):
     
     SD = {}
     # Projectデータの読み込み
-    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "todo"]
+    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "ticket"]
     try:
         conn = sqlite3.connect(prj_db_path)
         for i, table in enumerate(schedule_tables):
@@ -44,6 +44,7 @@ def read_schedule_data(db_dir):
         print(f"fetch daily data {table} {e}")
     finally:
         conn.close()
+    
     return SD
 
 
@@ -51,30 +52,26 @@ def save_schedule_data(SD, db_dir):
     prj_db_path = Path(db_dir) / "Projects.sqlite"
     day_db_path = Path(db_dir) / "Daily.sqlite"
     # Projectデータの保存
-    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "todo"]
+    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "ticket"]
     try:
         conn = sqlite3.connect(prj_db_path)
         for i, table in enumerate(schedule_tables):
             df = SD[i + 1].copy()
             df = df.reset_index().rename(columns={'index': 'IDX'})
             df.to_sql(table, conn, if_exists='replace', index=False, method='multi')
+        conn = sqlite3.connect(day_db_path)
+        for table in ["daily_sch", "daily_info"]:
+            df = SD[table].copy()
+            df = df.reset_index().rename(columns={'index': 'IDX'})
+            df.to_sql(table, conn, if_exists='replace', index=False, method='multi')
     except Exception as e:
         print(f"save schedule data {table} {e}")
     finally:    
         conn.close()
-    # SD[1].to_pickle(os.path.join(db_dir, "prj1_df.pkl"))
-    # SD[2].to_pickle(os.path.join(db_dir, "prj2_df.pkl"))
-    # SD[3].to_pickle(os.path.join(db_dir, "prj3_df.pkl"))
-    # SD[4].to_pickle(os.path.join(db_dir, "prj4_df.pkl"))
-    # SD[5].to_pickle(os.path.join(db_dir, "task_df.pkl"))
-    # SD[6].to_pickle(os.path.join(db_dir, "todo_df.pkl"))
-    # SD["daily_sch"].to_pickle(os.path.join(db_dir, "daily_table_df.pkl"))
-    # SD["daily_info"].to_pickle(os.path.join(db_dir, "daily_info_df.pkl"))
-    pass
 
 
 def create_new_prj_db(db_path):
-    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "todo"]
+    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "ticket"]
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
