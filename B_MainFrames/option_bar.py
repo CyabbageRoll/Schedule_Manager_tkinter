@@ -50,7 +50,9 @@ class OptionBar(tk.Frame):
         self.load_button()
 
     def load_button(self):
-        self.SD = DS.read_schedule_data(self.SP.server_dir)
+        SD = DS.read_schedule_data(self.SP.server_dir)
+        for key, df in SD.items():
+            self.SD[key] = df
         self.logger.debug("read schedule data")
         SP, GP, MEMO = self.json_rw.read()
         self.parameter_update(SP, GP, MEMO)

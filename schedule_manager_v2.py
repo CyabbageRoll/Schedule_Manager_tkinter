@@ -16,7 +16,7 @@ class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.logger = ut.logger_settings()
-        p_dir = os.path.dirname(os.path.dirname(__file__))
+        p_dir = os.path.dirname(__file__)
         self.json_rw = DS.JSONReadWrite(p_dir, self.logger)
         self.SP, self.GP, self.MEMO = self.json_rw.read()
         self.SD = DS.read_schedule_data(self.SP.server_dir)

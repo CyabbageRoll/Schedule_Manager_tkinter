@@ -52,11 +52,12 @@ class JSONReadWrite:
     def __init__(self, local_dir, logger):
         self.local_dir = local_dir
         self.logger = logger
+        self.logger.debug(f"local_dir: {local_dir}")
 
     def read(self):
         # localに置いている設定データの読み込み
         tmp_local = self._read_json(self.local_dir, "setting.json")
-        assert tmp_local is not None, "'config.json was not FOUND'"
+        assert tmp_local is not None, "'setting.json was not FOUND'"
         SPL = SettingParametersLocal(**tmp_local["Setting"])
         GPL = GUIParametersLocal(**tmp_local["GUI"])
         # サーバーに置いている設定データの読み込み
@@ -76,6 +77,8 @@ class JSONReadWrite:
 
     def _read_json(self, p_dir, file_name):
         file_name = os.path.join(p_dir, file_name)
+        self.logger.debug(f"json file exists: {os.path.exists(file_name)}")
+        self.logger.debug(f"read json file: {file_name}")
         if not os.path.exists(file_name):
             return None
         with open(file_name, encoding="UTF-8") as f:
@@ -83,7 +86,6 @@ class JSONReadWrite:
         return tmp
 
     def write(self, server_dir, SP=None, GP=None, MEMO=None):
-        print(MEMO)
         if MEMO is not None:
             self._write_json(server_dir, "memo.json", MEMO)
         if SP is not None and GP is not None:

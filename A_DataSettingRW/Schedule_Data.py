@@ -1,7 +1,5 @@
-import os
+import random
 from pathlib import Path
-from dataclasses import dataclass, asdict, field
-from typing import List
 import hashlib
 import datetime
 import pandas as pd
@@ -138,9 +136,10 @@ def create_new_daily_db(db_path):
 
 
 def serial_numbering(owner):
-    n = datetime.datetime.now().strftime("%y%m%d%f")
+    n = datetime.datetime.now().strftime("%y%m%d%H")
     n1, n2 = n[:6], n[6:]
-    return n1 + "_" + hashlib.md5((n2 + owner).encode()).hexdigest()[:4]
+    rn = str(random.randint(0, 99999))
+    return n1 + "_" + n2 + hashlib.md5((rn + owner).encode()).hexdigest()[:6]
 
 
 def pd_date(yyyy, mm, dd):
