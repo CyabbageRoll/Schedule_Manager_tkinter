@@ -4,9 +4,9 @@ from collections import OrderedDict
 # user
 import A_DataSettingRW as ds
 import C_Tab01_DailyTable as tab1
-import C_Tab02_Project as tab2
+# import C_Tab02_Project as tab2
 import C_Tab03_ProjectManage as tab3
-import C_Tab04_ScheduleTask as tab4
+# import C_Tab04_ScheduleTask as tab4
 
 
 class SubWindow(ttk.Notebook):
@@ -34,7 +34,7 @@ class SubWindow(ttk.Notebook):
         self.w = OrderedDict()
         self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
         self.w["Project-Manage"] = tab3.ProjectManage(self, bg="#3333ee")
-        self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")
+        # self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")
         
 
     def pack_widgets(self):

@@ -50,20 +50,33 @@ def save_schedule_data(SD, db_dir):
     prj_db_path = Path(db_dir) / "Projects.sqlite"
     day_db_path = Path(db_dir) / "Daily.sqlite"
     # Projectデータの保存
-    schedule_tables = ["prj1", "prj2", "prj3", "prj4", "task", "ticket"]
+    for i, table in enumerate(["prj1", "prj2", "prj3", "prj4", "task", "ticket"]):
+        upsert_sql_with_df(SD[i + 1], prj_db_path, table)
+    # Dailyデータの保存
+    for table in ["daily_sch", "daily_info"]:
+        upsert_sql_with_df(SD[table], day_db_path, table)
+
+
+def upsert_sql_with_df(df, db_path, table_name):
     try:
-        conn = sqlite3.connect(prj_db_path)
-        for i, table in enumerate(schedule_tables):
-            df = SD[i + 1].copy()
-            df = df.reset_index().rename(columns={'index': 'IDX'})
-            df.to_sql(table, conn, if_exists='replace', index=False, method='multi')
-        conn = sqlite3.connect(day_db_path)
-        for table in ["daily_sch", "daily_info"]:
-            df = SD[table].copy()
-            df = df.reset_index().rename(columns={'index': 'IDX'})
-            df.to_sql(table, conn, if_exists='replace', index=False, method='multi')
+        # データベースに接続
+        conn = sqlite3.connect(db_path)
+        # tableにデータがあるかどうかを確認
+        sql_select = f"SELECT IDX FROM {table_name}"
+        existing = pd.read_sql_query(sql_select, conn)
+        # 既存のデータは削除してから新規のデータを追加する
+        df_existing = df[df.index.isin(existing["IDX"].values)]
+        if len(df_existing):
+            indices = ", ".join([f"'{i}'" for i in df_existing.index])
+            sql = f"DELETE FROM {table_name} WHERE IDX IN ({indices})"
+            conn.execute(sql)
+            # ここではcommitしない。to_sqlで無事に実行された時にcommitされる
+        # 新規のデータを追加する
+        df_tmp = df.copy()
+        df_tmp = df_tmp.reset_index().rename(columns={'index': 'IDX'})
+        df_tmp.to_sql(table_name, conn, if_exists='append', index=False, method='multi')
     except Exception as e:
-        print(f"save schedule data {table} {e}")
+        print(f"save schedule data {table_name} {e}")
     finally:    
         conn.close()
 

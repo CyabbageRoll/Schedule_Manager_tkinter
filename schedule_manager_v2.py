@@ -92,10 +92,11 @@ class ScheduleManager(tk.Tk):
         self.logger.debug("refresh")
         self.mw.w["Schedule"].update()
         self.mw.w["Regularly"].update()
-        self.sw.w["Projects-Display"].refresh_button_press()
         self.mw.w["Projects-Display"].refresh_button_press()
         self.sw.w["Daily"].refresh()
         self.mw.w["Team"].refresh()
+        self.sw.w["Project-Manage"].w["Selector"].update_list_box()
+        self.mw.w["ATT"].w["selector"].update_list_box()
         # self.w["Project-Manage"].refresh()
         # self.w["ATT"].refresh()
 
