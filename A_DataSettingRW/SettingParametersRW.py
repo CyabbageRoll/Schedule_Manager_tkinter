@@ -39,8 +39,8 @@ class GUIParametersLocal:
 
 @dataclass
 class GUIParametersServer:
-    window_bg_color: str = "#9e9e8e"
-    schedule_bg_color: str = "#fff8dc"
+    window_bg_color: str = "#9E9E8E"
+    schedule_bg_color: str = "#FFF8DC"
 
 
 @dataclass
@@ -50,7 +50,7 @@ class GUIParameters(GUIParametersServer, GUIParametersLocal):
 
 class JSONReadWrite:
     def __init__(self, local_dir, logger):
-        self.local_dir = local_dir
+        self.local_dir = os.path.dirname(local_dir)
         self.logger = logger
         self.logger.debug(f"local_dir: {local_dir}")
 
