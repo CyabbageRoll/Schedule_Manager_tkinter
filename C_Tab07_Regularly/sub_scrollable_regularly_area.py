@@ -56,6 +56,7 @@ class ScrollableRegularlyArea(tk.Frame):
         # return
         self.w["area"].w["canvas"].bind("<ButtonPress-1>", self.mouse_click)
         self.w["area"].w["canvas"].bind("<ButtonPress-2>", self.mouse_click_right)
+        self.w["area"].w["canvas"].bind("<ButtonPress-3>", self.mouse_click_right)
         self.w["area"].w["canvas"].bind("<B1-Motion>", self.do_drag)
 
     def mouse_click(self, event):

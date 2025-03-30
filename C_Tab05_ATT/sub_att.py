@@ -35,9 +35,9 @@ class ATT(tk.Frame):
         self.w = OrderedDict()
         self.w["label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
         self.w["selector"] = sf.ProjectSelector(self, update_item=False)
+        self.w["table"] = sf.ScrollableTable(self, self.df)
         self.w["button_apply"] = sf.ButtonRow(self,
                                               buttons=[["APPLY", self.button_apply]])
-        self.w["table"] = sf.ScrollableTable(self, self.df)
         self.w["button_row"] = sf.ButtonRow(self,
                                             buttons=[["ADD", self.button_add],
                                                      ["DELETE", self.button_delete],
