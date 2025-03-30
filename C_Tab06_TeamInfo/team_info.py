@@ -55,6 +55,7 @@ class TeamInfo(tk.Frame):
 
     def set_info1(self):
         txt = "working hours\n"
+        txt = "Name : Begin ~ End [Working hours] (Breaks) : \n"
         for user_name in [self.SP.user] + self.SP.members:
             txt += f"\n{user_name:10s} : {self.fetch_working_hours(user_name)} : {self.fetch_info_overwork(user_name)}"
         self.set_new_text(1, txt)
@@ -68,9 +69,9 @@ class TeamInfo(tk.Frame):
         if not ds["CTOTAL"]:
             return ""
         
-        work_from = f'{ds["CFROM"][:2]}:{ds["CFROM"][2:]}'
-        work_to = f'{ds["CTO"][:2]}:{ds["CTO"][2:]}'
-        return f" {work_from} ~ {work_to}, {ds['CTOTAL']}h, ({ds['CBREAK']}h)"
+        work_from = f'{ds["CFROM"][1:3]}:{ds["CFROM"][3:]}'
+        work_to = f'{ds["CTO"][1:3]}:{ds["CTO"][3:]}'
+        return f" {work_from} ~ {work_to}  [{ds['CTOTAL']}h] ({ds['CBREAK']}h)"
 
     def fetch_info_overwork(self, user_name):
         df_idx = str(self.OB["Date"]) + "-" + user_name

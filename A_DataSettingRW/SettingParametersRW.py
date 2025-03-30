@@ -50,7 +50,7 @@ class GUIParameters(GUIParametersServer, GUIParametersLocal):
 
 class JSONReadWrite:
     def __init__(self, local_dir, logger):
-        self.local_dir = os.path.dirname(local_dir)
+        self.local_dir = os.path.dirname(os.path.abspath(local_dir))
         self.logger = logger
         self.logger.debug(f"local_dir: {local_dir}")
 

@@ -42,8 +42,8 @@ class MainWindow(ttk.Notebook):
         self.w["ATT"] = tab5.ATT(self, bg="#555555")
         self.w["Projects-Display"] = tab2.ProjectDisplay(self)
         self.w["Memo"] = tab8.TeamInfo(self)
-        self.w["Goals/Reflections"] = tk.Frame(self, bg="#555555")
-        self.w["Follows"] = tk.Frame(self, bg="#555555")
+        # self.w["Goals/Reflections"] = tk.Frame(self, bg="#555555")
+        # self.w["Follows"] = tk.Frame(self, bg="#555555")
 
     def pack_widgets(self):
         for key, widget in self.w.items():
