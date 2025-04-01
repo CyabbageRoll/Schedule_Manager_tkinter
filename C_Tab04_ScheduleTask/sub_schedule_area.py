@@ -24,7 +24,7 @@ class ScheduleArea(tk.Frame):
         self.line_left_space = 30
         self.y00 = 10
         self.max_columns = 100
-        self.dy = self.GP.font_size * 1.5
+        self.dy = self.GP.schedule_font_size * 1.5
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
         self.on_canvas_items_y = []
@@ -53,7 +53,7 @@ class ScheduleArea(tk.Frame):
         self.update(mode="both")
         
     def refresh_canvas_and_parameters(self):
-        self.dy = self.GP.font_size * 1.5
+        self.dy = self.GP.schedule_font_size * 1.5
         self.w["canvas"].delete("all")
         self.w["canvas"].configure(bg=self.GP.schedule_bg_color)
         self.draw_corner()
@@ -142,7 +142,7 @@ class ScheduleArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, self.GP.font_size + 5))
+                                                font=(self.GP.font_family, self.GP.schedule_font_size + 5))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # カレンダー表示
@@ -152,7 +152,7 @@ class ScheduleArea(tk.Frame):
         for x0, x1, str_dd in self.calender_items:
             self.w["canvas"].create_text(xs + (x0 + x1) / 2, y0, 
                                          text=str_dd, anchor="center",
-                                         font=(self.GP.font_family, self.GP.font_size))
+                                         font=(self.GP.font_family, self.GP.schedule_font_size))
             self.w["canvas"].create_line(xs + x0, y0, xs + x0, ye,
                                          fill="#99aabb")
 
@@ -177,7 +177,7 @@ class ScheduleArea(tk.Frame):
             item_idx = self.w["canvas"].create_text(x0 + self.line_left_space + 5, y0, 
                                                     text=text, 
                                                     anchor="w",
-                                                    font=(self.GP.font_family, self.GP.font_size))
+                                                    font=(self.GP.font_family, self.GP.schedule_font_size))
             self.on_canvas_items[item_idx] = (self.class_idx, idx)
         return y0 + self.dy * 2
     

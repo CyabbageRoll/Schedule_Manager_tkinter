@@ -42,7 +42,7 @@ class OptionBar(tk.Frame):
             widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def save_button(self):
-        DS.save_schedule_data(self.SD, self.SP.server_dir)
+        DS.save_schedule_data(self.SD, self.SP.server_dir, self.SP.user)
         self.logger.debug("save schedule data")
         self.get_memo_dict()
         self.json_rw.write(self.SP.server_dir, SP=self.SP, GP=self.GP, MEMO=self.MEMO)

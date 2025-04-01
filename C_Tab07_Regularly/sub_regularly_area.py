@@ -22,7 +22,7 @@ class RegularlyArea(tk.Frame):
         self.x00 = 10
         self.line_left_space = 30
         self.y00 = 10
-        self.dy = self.GP.font_size * 1.5
+        self.dy = self.GP.schedule_font_size * 1.5
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
         self.on_canvas_items_y = []
@@ -51,7 +51,7 @@ class RegularlyArea(tk.Frame):
         self.update()
         
     def refresh_canvas_and_parameters(self):
-        self.dy = self.GP.font_size * 1.5
+        self.dy = self.GP.schedule_font_size * 1.5
         self.w["canvas"].delete("all")
         self.w["canvas"].configure(bg=self.GP.schedule_bg_color)
         self.draw_corner()
@@ -137,7 +137,7 @@ class RegularlyArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, self.GP.font_size + 5))
+                                                font=(self.GP.font_family, self.GP.schedule_font_size + 5))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # アイテム表示
@@ -159,7 +159,7 @@ class RegularlyArea(tk.Frame):
             item_idx = self.w["canvas"].create_text(x0 + self.line_left_space + 5, y0, 
                                                     text=text, 
                                                     anchor="w",
-                                                    font=(self.GP.font_family, self.GP.font_size))
+                                                    font=(self.GP.font_family, self.GP.schedule_font_size))
             self.on_canvas_items[item_idx] = (self.class_idx, idx)
         return y0 + self.dy * 2
     

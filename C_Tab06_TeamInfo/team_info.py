@@ -94,7 +94,7 @@ class TeamInfo(tk.Frame):
             return ""
         ds_info = self.SD["daily_info"].loc[df_idx, :]
         info_dic = {}
-        for idx in ds_info.index:
+        for idx in ds_info.index[1:]:
             if ds_info[idx] and ds_info[idx] == ds_info[idx]:
                 info_dic[idx] = ds_info[idx]
         txt = ""

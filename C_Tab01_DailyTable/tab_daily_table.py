@@ -39,7 +39,7 @@ class DailyInformation(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         input_rows = {}
-        for k in self.SD["daily_info"].columns:
+        for k in self.SD["daily_info"].columns[1:]:
             input_rows[k] = ["combobox", ["", [], "normal"]]
         self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
         # 入力した予定の取り消し
@@ -102,11 +102,12 @@ class DailyInformation(tk.Frame):
         df_idx = self.generate_df_idx()
         if df_idx not in self.SD["daily_sch"].index:
             self.SD["daily_sch"].loc[df_idx, :] = ""
+            self.SD["daily_sch"].loc[df_idx, "Owner"] = self.SP.user
 
         ds = self.SD["daily_sch"].loc[df_idx, :]
         items = [["", "", "", ""] for _ in range(24*4)]
         for i in range(24*4):
-            idx = ds.iloc[i]
+            idx = ds.iloc[i+1]
             if not idx:
                 continue
             item_name = self.SD[6].loc[idx, "Name"]
@@ -163,7 +164,7 @@ class DailyInformation(tk.Frame):
         self.calc_working_hours()
 
     def set_bind(self):
-        for k in self.SD["daily_info"].columns:
+        for k in self.SD["daily_info"].columns[1:]:
             self.w["Info_area"].w[k].w["Box"].bind("<Return>", lambda x, k=k: self.info_item_update_bind_func(k, x))
             self.w["Info_area"].w[k].w["Box"].bind("<FocusOut>", lambda x, k=k: self.info_item_update_bind_func(k, x))
 
@@ -174,6 +175,7 @@ class DailyInformation(tk.Frame):
         txt = self.w["Info_area"].w[k].get()
         df_idx = self.generate_df_idx()
         self.SD["daily_info"].loc[df_idx, k] = txt
+        self.SD["daily_info"].loc[df_idx, "Owner"] = self.SP.user
         self.daily_info_update_bind()
 
     def generate_df_idx(self):
@@ -181,10 +183,13 @@ class DailyInformation(tk.Frame):
     
     def set_info_values(self):
         df_idx = self.generate_df_idx()
-        for k in self.SD["daily_info"].columns:
+        for k in self.SD["daily_info"].columns[1:]:
             v = self.SD["daily_info"].loc[df_idx, k] if df_idx in self.SD["daily_info"].index else ""
-            if v == v:
+            if v == v and v is not None:
                 self.w["Info_area"].set(k, v)
+            else:
+                self.w["Info_area"].set(k, "")
+
 
     def calc_working_hours(self):
         df_idx = self.generate_df_idx()

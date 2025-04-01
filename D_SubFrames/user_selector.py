@@ -24,7 +24,7 @@ class UserSelector(tk.Frame):
 
     def set_variables(self):
         self.display_user = tk.StringVar()
-        self.members = [self.SP.user] + self.SP.members
+        self.members = [self.SP.user] + [m for m in self.SP.members if m != self.SP.user]
 
     def set_init(self):
         self.display_user.set(self.SP.user)

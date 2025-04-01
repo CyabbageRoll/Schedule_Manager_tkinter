@@ -139,7 +139,7 @@ class ProjectManage(tk.Frame):
     def is_correct_name_hour_parent(self, ds, class_idx, current_idx):
         if not self.is_name_unique(ds, class_idx, current_idx):
             return False, "Name is not unique"
-        if not self.is_not_hour_zero(ds):
+        if not self.is_not_hour_zero(ds, class_idx):
             return False, "estimate hour is Zero"
         if not self.exists_parent(ds, class_idx):
             return False, "parent does not exist"
@@ -157,7 +157,9 @@ class ProjectManage(tk.Frame):
             return False
         return True
 
-    def is_not_hour_zero(self, ds):
+    def is_not_hour_zero(self, ds, class_idx):
+        if class_idx != 6:
+            return True
         if ds["Total_Estimate_Hour"] > 0:
             return True
         return False

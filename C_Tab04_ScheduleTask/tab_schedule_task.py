@@ -47,7 +47,7 @@ class ScheduleTask(tk.Frame):
         self.w["schedule"].w["area"].label_update_func = self.set_label
 
     def update_func(self, mode=None):
-        self.GP.font_size = int(self.w["inp_box"].get_font_size())
+        self.GP.schedule_font_size = int(self.w["inp_box"].get_font_size())
         self.SP.schedule_width = int(self.w["inp_box"].get_width())
         self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
         print(self.GP)

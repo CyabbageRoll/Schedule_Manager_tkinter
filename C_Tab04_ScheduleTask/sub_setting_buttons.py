@@ -38,7 +38,7 @@ class SettingButtons(tk.Frame):
                                             init_value=self.SP.schedule_calender_type,
                                             state="readonly",
                                             combo_list=self.calender_list)
-        self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=self.GP.font_size)
+        self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=self.GP.schedule_font_size)
         self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=self.SP.schedule_width)
         self.w["color_label"] = tk.Label(self, text="BackColor", font=self.font)
         self.w["color"] = sf.ColorSelector(self, init_color=self.GP.schedule_bg_color)

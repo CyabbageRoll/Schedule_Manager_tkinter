@@ -35,6 +35,7 @@ class GUIParametersLocal:
     window_height: int =1000
     font_family = "Meiryo"
     font_size: int = 9
+    schedule_font_size: int = 9
 
 
 @dataclass

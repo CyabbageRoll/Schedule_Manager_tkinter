@@ -2,7 +2,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-def logger_settings(log_file="./log/debug.log"):
+def logger_settings(log_file="./log/debug.log", add_info=""):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
@@ -21,7 +21,7 @@ def logger_settings(log_file="./log/debug.log"):
 
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-    logger.debug("Application Starts")
+    logger.debug("\n\n\n\nApplication Starts")
 
     return logger
 

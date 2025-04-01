@@ -46,18 +46,19 @@ def read_schedule_data(db_dir):
     return SD
 
 
-def save_schedule_data(SD, db_dir):
+def save_schedule_data(SD, db_dir, user_name):
     prj_db_path = Path(db_dir) / "Projects.sqlite"
     day_db_path = Path(db_dir) / "Daily.sqlite"
     # Projectデータの保存
     for i, table in enumerate(["prj1", "prj2", "prj3", "prj4", "task", "ticket"]):
-        upsert_sql_with_df(SD[i + 1], prj_db_path, table)
+        upsert_sql_with_df(SD[i + 1], prj_db_path, table, user_name)
     # Dailyデータの保存
     for table in ["daily_sch", "daily_info"]:
-        upsert_sql_with_df(SD[table], day_db_path, table)
+        upsert_sql_with_df(SD[table], day_db_path, table, user_name)
 
 
-def upsert_sql_with_df(df, db_path, table_name):
+def upsert_sql_with_df(df, db_path, table_name, user_name):
+    df = df[df["Owner"] == user_name].copy()
     try:
         # データベースに接続
         conn = sqlite3.connect(db_path)
@@ -119,10 +120,10 @@ def create_new_prj_db(db_path):
 
 
 def create_new_daily_db(db_path):
-    DAILY_TABLE = ["IDX"] + \
+    DAILY_TABLE = ["IDX", "Owner"] + \
                   [f"C{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)] + \
                   ["CTOTAL", "CFROM", "CTO", "CBREAK"]
-    DAILY_ITEMS = ["IDX", "Health", "Work_Place", "Safety", "OverWork", "Info1", "Info2", "Info3"]
+    DAILY_ITEMS = ["IDX", "Owner", "Health", "Work_Place", "Safety", "OverWork", "Info1", "Info2", "Info3"]
     daily_table_columns = ", ".join([f"{item} TEXT" for item in DAILY_TABLE])
     daily_items_columns = ", ".join([f"{item} TEXT" for item in DAILY_ITEMS])
     

@@ -15,7 +15,8 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.logger = ut.logger_settings()
+        self.VER = "v2-r20250401"
+        self.logger = ut.logger_settings(add_info=self.VER)
         p_dir = os.path.dirname(__file__)
         self.json_rw = DS.JSONReadWrite(p_dir, self.logger)
         self.SP, self.GP, self.MEMO = self.json_rw.read()
@@ -25,11 +26,10 @@ class ScheduleManager(tk.Tk):
         self.set_frames()
         self.grid_frames()
         self.set_binds()
-        self.init()
 
     def tk_setting(self):
         self.font = tkinter.font.Font(self, family=self.GP.font_family, size=self.GP.font_size)
-        self.title("Schedule App")
+        self.title(f"Schedule App {self.VER}")
         self.geometry(f"{self.GP.window_width}x{self.GP.window_height}")
         self.configure(bg=self.GP.window_bg_color)
 
@@ -99,18 +99,11 @@ class ScheduleManager(tk.Tk):
         self.mw.w["ATT"].w["selector"].update_list_box()
         # self.w["Project-Manage"].refresh()
         # self.w["ATT"].refresh()
-
         # self.w["Goals/Reflections"].refresh()
         # self.w["Follows"].refresh()
-
-    def init(self):
-        # self.task_click(6, "250103_cb12")
-        # for key in self.SD:
-        #     print(key)
-        #     print(self.SD[key])
-        pass
 
 
 if __name__ == "__main__":
     sch_app = ScheduleManager()
     sch_app.mainloop()
+    sch_app.logger.debug("Application Ends")

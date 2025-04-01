@@ -54,4 +54,4 @@ class TeamInfo(tk.Frame):
     def get_to_memo_dict(self):
         txt = self.w["Memo"].get("1.0", tk.END)
         self.MEMO["Memo"] = txt
-        self.logger.debug(f"memo updated {txt}")
+        self.logger.debug(f"memo updated")
