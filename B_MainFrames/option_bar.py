@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from collections import OrderedDict
 
 import A_DataSettingRW as DS
@@ -34,8 +35,8 @@ class OptionBar(tk.Frame):
         s = 1
         self.w["date_selector"] = sf.DateSelectorButton(self, date_update_callback=self.date_update_callback)
         self.w["selector"] = sf.UserSelector(self, user_change_callback=self.user_change_callback)
-        self.w["save_button"] = tk.Button(self, text="Save", width=s, height=s, command=self.save_button, font=self.font)
-        self.w["load_button"] = tk.Button(self, text="Load", width=s, height=s, command=self.load_button, font=self.font)
+        self.w["save_button"] = ttk.Button(self, text="Save", width=s, command=self.save_button, style="My.TButton")
+        self.w["load_button"] = ttk.Button(self, text="Load", width=s, command=self.load_button, style="My.TButton")
 
     def pack_widgets(self):
         for key, widget in self.w.items():

@@ -1,6 +1,7 @@
 # default
 from collections import OrderedDict
 import tkinter as tk
+from tkinter import ttk
 # additional
 import pandas as pd
 # user
@@ -25,7 +26,7 @@ class ProjectDisplay(tk.Frame):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Refresh_button"] =  tk.Button(self, text="Refresh", command=self.refresh_button_press, font=self.font, height=1)
+        self.w["Refresh_button"] =  ttk.Button(self, text="Refresh", command=self.refresh_button_press, style="My.TButton")
         H = ["Owner", "Status", "Plan_Begin_Date", "Plan_End_Date", "Total_Estimate_Hour", "Actual_Hour"]
         I = {"1": [1]*len(H)}
         df = pd.DataFrame.from_dict(I, columns=H, orient="index")

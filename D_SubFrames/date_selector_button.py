@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import datetime
 import tkinter as tk
+from tkinter import ttk
 
 if __name__ == "__main__":
     import sys
@@ -30,10 +31,10 @@ class DateSelectorButton(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         s = 1
-        self.w["left_arrow"] = tk.Button(self, text="◀️", width=s, height=s, command=self.click_left, font=self.font)
+        self.w["left_arrow"] = ttk.Button(self, text="◀️", width=s, command=self.click_left, style="My.TButton")
         self.w["date_box"] = sf.DateInputBox(self, press_enter_callback=self.date_update_callback, height=s)
-        self.w["right_arrow"] = tk.Button(self, text="▶️", width=s, height=s, command=self.click_right, font=self.font)
-        self.w["move_today"] = tk.Button(self, text="Today", width=s, height=s, command=self.click_today, font=self.font)
+        self.w["right_arrow"] = ttk.Button(self, text="▶️", width=s, command=self.click_right, style="My.TButton")
+        self.w["move_today"] = ttk.Button(self, text="Today", width=s, command=self.click_today, style="My.TButton")
 
     def pack_widgets(self):
         for key, widget in self.w.items():

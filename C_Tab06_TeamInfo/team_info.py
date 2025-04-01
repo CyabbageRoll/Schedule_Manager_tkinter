@@ -15,6 +15,7 @@ class TeamInfo(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.OB = master.OB
+        self.members = [self.SP.user] + [m for m in self.SP.members if m != self.SP.user]
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -56,7 +57,7 @@ class TeamInfo(tk.Frame):
     def set_info1(self):
         txt = "working hours\n"
         txt = "Name : Begin ~ End [Working hours] (Breaks) : \n"
-        for user_name in [self.SP.user] + self.SP.members:
+        for user_name in self.members:
             txt += f"\n{user_name:10s} : {self.fetch_working_hours(user_name)} : {self.fetch_info_overwork(user_name)}"
         self.set_new_text(1, txt)
 
@@ -84,7 +85,7 @@ class TeamInfo(tk.Frame):
 
     def set_info2(self):
         txt = "information\n"
-        for user_name in [self.SP.user] + self.SP.members:
+        for user_name in self.members:
             txt += f"\n{user_name:10s}: \n{self.fetch_info(user_name)}"
         self.set_new_text(2, txt)
 

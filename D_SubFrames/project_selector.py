@@ -1,6 +1,7 @@
 # default
 from collections import OrderedDict
 import tkinter as tk
+from tkinter import ttk
 # additional
 import pandas as pd
 # user
@@ -53,7 +54,7 @@ class ProjectSelector(tk.Frame):
             
         self.w3 = OrderedDict()
         self.w3["Idx"] = sf.LabelCombo(self, label_txt="index", label_width=20, state="disabled")
-        self.w3["ClearButton"] = tk.Button(self, text="Clear", command=self.clear_button_press, font=self.font)
+        self.w3["ClearButton"] = ttk.Button(self, text="Clear", command=self.clear_button_press, style="My.TButton")
 
     def pack_widgets(self):
         selected_class = self.w1["Class_selector"].get()

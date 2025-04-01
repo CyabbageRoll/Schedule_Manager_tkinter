@@ -1,6 +1,7 @@
 # default
 from collections import OrderedDict
 import tkinter as tk
+from tkinter import ttk
 # additional
 import pandas as pd
 # user
@@ -32,13 +33,13 @@ class UpDownBox(tk.Frame):
         self.w = OrderedDict()
         if self.label:
             self.w["label"] = tk.Label(self, text=self.label, font=self.font)
-        self.w["M"] = tk.Button(self, text="-", command=self.click_m, font=self.font)
+        self.w["M"] = ttk.Button(self, text="-", command=self.click_m, style="My.TButton", width=1)
         self.w["Box"] = tk.Entry(self, 
                                  textvariable=self.value,
                                  justify=tk.CENTER,
                                  width=10,
                                  font=self.font)
-        self.w["P"] = tk.Button(self, text="+", command=self.click_p, font=self.font)
+        self.w["P"] = ttk.Button(self, text="+", command=self.click_p, style="My.TButton", width=1)
 
     def pack_widgets(self):
         for k, widget in self.w.items():

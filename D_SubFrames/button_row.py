@@ -20,7 +20,7 @@ class ButtonRow(tk.Frame):
     def set_widgets(self, buttons):
         self.w = OrderedDict()
         for txt, cb in buttons:
-            self.w[txt] = tk.Button(self, text=txt, command=cb, font=self.font)
+            self.w[txt] = ttk.Button(self, text=txt, command=cb, style="My.TButton")
     
     def pack_widgets(self):
         for key, widget in self.w.items():

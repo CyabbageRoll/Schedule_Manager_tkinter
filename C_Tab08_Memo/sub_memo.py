@@ -46,7 +46,13 @@ class TeamInfo(tk.Frame):
         self.w[f"Memo"].insert(tk.END, txt)
 
     def set_memo(self):
-        self.set_new_text(self.MEMO["Memo"])
+        memo_txt = self.MEMO["Memo"]
+        # print(f"{memo_txt=}")
+        # print(f"{memo_txt[-1:]=}")
+        while len(memo_txt) > 2 and memo_txt[-1:] == "\n":
+            memo_txt = memo_txt[:-1]
+        # print(f"{memo_txt=}")
+        self.set_new_text(memo_txt)
 
     def press_key(self, event):
         self.get_to_memo_dict()

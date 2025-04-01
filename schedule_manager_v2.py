@@ -34,9 +34,14 @@ class ScheduleManager(tk.Tk):
         self.configure(bg=self.GP.window_bg_color)
 
         s = ttk.Style()
-        s.configure('TNotebook.Tab', font=self.font)
-        s.configure('Treeview', font=self.font)
-        s.configure('Treeview.Heading', font=self.font)
+        s.theme_use("clam")
+        s.configure("Treeview", font=self.font)
+        s.configure("Treeview.Heading", font=self.font)
+        s.configure("My.TButton", font=self.font, padding=[3, 3], background="white", foreground="black")
+        s.configure("TNotebook.Tab", font=self.font, padding=[25, 5], foreground="white", background="gray")
+        s.map("TNotebook.Tab", background=[("selected", "white"), ("disabled", "gray")],
+                               foreground=[("selected", "black"), ("disabled", "white")],
+                               padding=[("selected", [25, 5]), ("disabled", [25, 5])],)
 
     def set_frames(self):
         self.ob = mf.OptionBar(self, bg="#e09999", height=100, width=900)

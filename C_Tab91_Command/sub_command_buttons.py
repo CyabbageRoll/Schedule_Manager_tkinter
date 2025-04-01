@@ -29,7 +29,7 @@ class UserCommandButtons(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         for i, button in enumerate(self.Buttons):
-            self.w[f"B{i+1:02d}"] = ttk.Button(self, text=button, command=lambda k=i+1:self.press_command(f"B{k:02d}"), style="TButton")
+            self.w[f"B{i+1:02d}"] = ttk.Button(self, text=button, command=lambda k=i+1:self.press_command(f"B{k:02d}"), style="My.TButton")
 
     def pack_widgets(self):
         for k, widget in self.w.items():
