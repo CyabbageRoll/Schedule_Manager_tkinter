@@ -30,7 +30,7 @@ class SettingButtons(tk.Frame):
         self.w = OrderedDict()
         self.w["prj_type"] = sf.LabelCombo(self, label_txt="Display Type",
                                            label_width=15,
-                                           init_value=self.SP.schedule_prj_type,
+                                           init_value=self.class_list[self.SP.schedule_prj_type-2],
                                            state="readonly",
                                            combo_list=self.class_list)
         self.w["date_type"] = sf.LabelCombo(self, label_txt="Calender Type",

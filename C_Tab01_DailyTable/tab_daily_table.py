@@ -40,7 +40,8 @@ class DailyInformation(tk.Frame):
         self.w = OrderedDict()
         input_rows = {}
         for k in self.SD["daily_info"].columns[1:]:
-            input_rows[k] = ["combobox", ["", [], "normal"]]
+            combo_list = vars(self.SP).get(f"daily_info_combo_{k}", [])
+            input_rows[k] = ["combobox", ["", combo_list, "normal"]]
         self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
         # 入力した予定の取り消し
         self.w["Buttons"] = sf.ButtonRow(self, buttons=[["Free", self.delete_item]])

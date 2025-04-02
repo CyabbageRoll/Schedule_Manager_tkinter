@@ -15,7 +15,7 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.VER = "v2-r20250401"
+        self.VER = "v2-r20250402"
         self.logger = ut.logger_settings(add_info=self.VER)
         p_dir = os.path.dirname(__file__)
         self.json_rw = DS.JSONReadWrite(p_dir, self.logger)

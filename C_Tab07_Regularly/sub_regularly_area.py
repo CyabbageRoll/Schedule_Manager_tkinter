@@ -22,7 +22,7 @@ class RegularlyArea(tk.Frame):
         self.x00 = 10
         self.line_left_space = 30
         self.y00 = 10
-        self.dy = self.GP.schedule_font_size * 1.5
+        self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
         self.on_canvas_items_y = []
@@ -51,7 +51,7 @@ class RegularlyArea(tk.Frame):
         self.update()
         
     def refresh_canvas_and_parameters(self):
-        self.dy = self.GP.schedule_font_size * 1.5
+        self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.w["canvas"].delete("all")
         self.w["canvas"].configure(bg=self.GP.schedule_bg_color)
         self.draw_corner()
@@ -137,7 +137,7 @@ class RegularlyArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, self.GP.schedule_font_size + 5))
+                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # アイテム表示
@@ -169,13 +169,15 @@ class RegularlyArea(tk.Frame):
             df = self.SD[self.class_idx - 1 - i]
             name, idx = df.loc[idx, ["Name", "Parent_ID"]]
             names.append(name)
-        
+        names = [n for n in names if n != "-"]
+        if len(names) == 0:
+            names = ["-"]
         name, p_names = names[0], names[1:]
         s = name + f" : "
         if p_names:
             s += " (" + " - ".join(p_names) + ") "
         return s
-
+    
     def get_draw_items(self):
         p_ids = set(self.SD[self.class_idx-1].index.tolist())
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]

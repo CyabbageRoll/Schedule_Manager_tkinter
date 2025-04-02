@@ -22,6 +22,10 @@ class SettingParametersServer:
     schedule_draw_width: int = 10
     schedule_prj_type: str = "Task"
     schedule_calender_type: str = "Daily"
+    daily_info_combo_Health: List[str] = field(default_factory=lambda: ["Good", "Bad"])
+    daily_info_combo_Work_Place: List[str] = field(default_factory=lambda: ["Office", "Home"])
+    daily_info_combo_Safety: List[str] = field(default_factory=lambda: [])
+    daily_info_combo_OverWork: List[str] = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -42,6 +46,8 @@ class GUIParametersLocal:
 class GUIParametersServer:
     window_bg_color: str = "#9E9E8E"
     schedule_bg_color: str = "#FFF8DC"
+    schedule_dy_factor: float = 2.2
+    schedule_title_fontsize_factor: float = 1.1
 
 
 @dataclass
@@ -69,7 +75,7 @@ class JSONReadWrite:
         else:
             SPS = SettingParametersServer(**tmp_server["Setting"])
             GPS = GUIParametersServer(**tmp_server["GUI"])
-        MEMO = self._read_json(SPL.server_dir, "memo.json")
+        MEMO = self._read_json(SPL.server_dir, f"memo_{SPL.user}.json")
         if MEMO is None:
             MEMO = self._white_memo()
         SP = SettingParameters(**vars(SPL), **vars(SPS))
@@ -87,12 +93,12 @@ class JSONReadWrite:
         return tmp
 
     def write(self, server_dir, SP=None, GP=None, MEMO=None):
-        if MEMO is not None:
-            self._write_json(server_dir, "memo.json", MEMO)
         if SP is not None and GP is not None:
             PL, PS = self._arrange_parameters(SP, GP)
             self._write_json(SP.server_dir, f"setting_{SP.user}.json", PS)
             self._write_json(self.local_dir, "setting.json", PL)
+        if MEMO is not None:
+            self._write_json(server_dir, f"memo_{SP.user}.json", MEMO)
 
     def _write_json(self, p_dir, file_name, save_item):
         file_name = os.path.join(p_dir, file_name)

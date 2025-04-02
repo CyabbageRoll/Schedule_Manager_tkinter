@@ -24,7 +24,7 @@ class ScheduleArea(tk.Frame):
         self.line_left_space = 30
         self.y00 = 10
         self.max_columns = 100
-        self.dy = self.GP.schedule_font_size * 1.5
+        self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
         self.on_canvas_items_y = []
@@ -53,7 +53,7 @@ class ScheduleArea(tk.Frame):
         self.update(mode="both")
         
     def refresh_canvas_and_parameters(self):
-        self.dy = self.GP.schedule_font_size * 1.5
+        self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.w["canvas"].delete("all")
         self.w["canvas"].configure(bg=self.GP.schedule_bg_color)
         self.draw_corner()
@@ -142,7 +142,7 @@ class ScheduleArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, self.GP.schedule_font_size + 5))
+                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # カレンダー表示
@@ -168,7 +168,7 @@ class ScheduleArea(tk.Frame):
             text = f" {order_idx} {ds['Name']}" + hours + due_date
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x1 + self.line_left_space, y0, 
-                                         fill="#ffbbee", 
+                                         fill="#FFBBEE", 
                                          width=self.dy)
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x0 + self.line_left_space + 5, y0,
@@ -187,7 +187,9 @@ class ScheduleArea(tk.Frame):
             df = self.SD[self.class_idx - 1 - i]
             name, idx = df.loc[idx, ["Name", "Parent_ID"]]
             names.append(name)
-        
+        names = [n for n in names if n != "-"]
+        if len(names) == 0:
+            names = ["-"]
         name, p_names = names[0], names[1:]
         s = name + f" : "
         if p_names:
@@ -216,10 +218,32 @@ class ScheduleArea(tk.Frame):
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
         df = self.SD[self.class_idx]
         df = df[df["Status"] == "ToDo"]
-        # [ ] task以外の場合 所有者が選択しているメンバーでない場合も表示する必要があるので対応が必要
-        df = df[df["Owner"] == self.OB["Member"]]
+        if self.class_idx == 6:
+            df = df[df["Owner"] == self.OB["Member"]]
+        else:
+            df = self.squeeze_user_related_df(df, self.OB["Member"], self.class_idx)
         df_items = {p_id: df[df["Parent_ID"] == p_id] for p_id in p_ids}
         return df_items
+    
+    def squeeze_user_related_df(self, df, member, class_idx):
+        relative_ids = []
+        for i in range(class_idx, 6):
+            df_child = self.SD[6 - i + class_idx]
+            df_parent = self.SD[5 - i + class_idx]
+            # 子供の工数を足し合わせて親の工数を更新
+            for idx in df_parent.index:
+                df_child_tmp = df_child[df_child["Parent_ID"] == idx]
+                estimate_hours = df_child_tmp["Total_Estimate_Hour"].sum()
+                actual_hours = df_child_tmp["Actual_Hour"].sum()
+                self.SD[5 - i + class_idx].loc[idx, "Total_Estimate_Hour"] = estimate_hours
+                self.SD[5 - i + class_idx].loc[idx, "Actual_Hour"] = actual_hours
+            # 子供の持ち主がmemberかもしくは、親の持ち主がmemberであるidxを抽出する
+            df_child_1 = df_child[df_child["Owner"] == member]
+            relative_ids1 = set(df_child_1["Parent_ID"].values.tolist())
+            relative_ids2 = set(df_child.loc[relative_ids, "Parent_ID"].values.tolist())
+            relative_ids3 = set(df_parent[df_parent["Owner"] == member].index.tolist())
+            relative_ids = relative_ids1 | relative_ids2 | relative_ids3
+        return df[df.index.isin(relative_ids)]
 
     # 並び替えて、日付をdatetime64に変換
     def arrange_df_with_order(self, df_items):

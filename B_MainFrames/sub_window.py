@@ -33,8 +33,8 @@ class SubWindow(ttk.Notebook):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Daily"] = tab1.DailyInformation(self, bg="#5555ee")
-        self.w["Project-Manage"] = tab3.ProjectManage(self, bg="#3333ee")
+        self.w["Daily"] = tab1.DailyInformation(self)
+        self.w["Project-Manage"] = tab3.ProjectManage(self)
         self.w["Commands"] = tab91.UserCommandButtons(self)
 
         # self.w["Projects-Display"] = tab2.ProjectDisplay(self, bg="#ee2222")

@@ -50,7 +50,6 @@ class ScheduleTask(tk.Frame):
         self.GP.schedule_font_size = int(self.w["inp_box"].get_font_size())
         self.SP.schedule_width = int(self.w["inp_box"].get_width())
         self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
-        print(self.GP)
         if mode == "prj":
             prj_type = self.w["inp_box"].get_prj_type()
             self.SP.schedule_prj_type = prj_type
