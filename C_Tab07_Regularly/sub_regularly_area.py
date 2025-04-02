@@ -131,9 +131,9 @@ class RegularlyArea(tk.Frame):
         df_p = self.SD[self.class_idx-1]
         ds_p = df_p.loc[p_id]
         names = self.get_parent_name(self.class_idx-1, p_id)
-        self.w["canvas"].create_line(self.x00, y0, self.x00 + 1000, y0,
-                                     fill=self.color_dict[ds_p["Color"]],
-                                     width=self.dy + 2)
+        ye = self.dy * (len(schedule_items) + 2)
+        self.w["canvas"].create_line(self.x00, y0+self.dy/2, self.x00 + 10000, y0+self.dy/2,
+                                     fill="#99AABB")
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
@@ -150,12 +150,12 @@ class RegularlyArea(tk.Frame):
             text = f"{ds['Name']}" + hours
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x1 + self.line_left_space, y0, 
-                                         fill="#ffbbee", 
-                                         width=self.dy)
+                                         fill="#FFBBEE", 
+                                         width=self.dy*0.9)
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x0 + self.line_left_space + 5, y0,
                                          fill=self.color_dict[ds["Color"]],
-                                         width=self.dy)
+                                         width=self.dy*0.9)
             item_idx = self.w["canvas"].create_text(x0 + self.line_left_space + 5, y0, 
                                                     text=text, 
                                                     anchor="w",

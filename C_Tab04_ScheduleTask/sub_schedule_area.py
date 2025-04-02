@@ -21,7 +21,7 @@ class ScheduleArea(tk.Frame):
         self.undraw_p_ids = set()
         self.width_scale = 10
         self.x00 = 10
-        self.line_left_space = 30
+        self.line_left_space = 15
         self.y00 = 10
         self.max_columns = 100
         self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
@@ -136,10 +136,13 @@ class ScheduleArea(tk.Frame):
         df_p = self.SD[self.class_idx-1]
         ds_p = df_p.loc[p_id]
         names = self.get_parent_name(self.class_idx-1, p_id)
-        self.w["canvas"].create_line(self.x00, y0, self.x00 + 1000, y0,
+        ye = self.dy * (len(schedule_items) + 2)
+        self.w["canvas"].create_line(self.x00, y0+self.dy/2, self.x00 + 10000, y0+self.dy/2,
+                                     fill="#99AABB")
+        self.w["canvas"].create_line(self.x00+self.line_left_space/2-1, y0-self.dy/2, self.x00+self.line_left_space/2-1, y0+ye,
                                      fill=self.color_dict[ds_p["Color"]],
-                                     width=self.dy + 2)
-        item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
+                                     width=self.line_left_space-1)
+        item_idx = self.w["canvas"].create_text(self.x00+self.line_left_space+2, y0, 
                                                 text=names,
                                                 anchor = "w",
                                                 font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
@@ -153,22 +156,33 @@ class ScheduleArea(tk.Frame):
             self.w["canvas"].create_text(xs + (x0 + x1) / 2, y0, 
                                          text=str_dd, anchor="center",
                                          font=(self.GP.font_family, self.GP.schedule_font_size))
-            self.w["canvas"].create_line(xs + x0, y0, xs + x0, ye,
-                                         fill="#99aabb")
+            self.w["canvas"].create_line(xs + x0, y0-self.dy/2, xs + x0, ye,
+                                         fill="#99AABB")
+
+            self.w["canvas"].create_line(self.x00 + self.line_left_space, y0+self.dy/2, self.x00+10000, y0+self.dy/2,
+                                         fill="#99AABB")
+            self.w["canvas"].create_line(self.x00 + self.line_left_space, ye, self.x00+10000, ye,
+                                         fill="#99AABB")
+        y0 += self.dy * 0.2
 
         # アイテム表示
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == p_id]
-        for x0, x1, idx in schedule_items:
+        for x0, x1, idx, remaining_hour in schedule_items:
             ds = df.loc[idx]
+            # red_flag = remaining_hour - ds["Total_Estimate_Hour"] + ds["Actual_Hour"] < 0
+            # print(remaining_hour, ds["Total_Estimate_Hour"], ds["Actual_Hour"])
+            # print(red_flag)
+            red_flag = False
             y0 += self.dy
             order_idx = f"[{int(ds['OrderValue'])}]"
             due_date = f" : ({ds['Plan_End_Date']})" if ds["Plan_End_Date"] else ""
             hours = f" : {ds['Actual_Hour']}/{ds['Total_Estimate_Hour']} [hr]"
             text = f" {order_idx} {ds['Name']}" + hours + due_date
+            color = "#FFBBEE" if red_flag else "#99BBBB"
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x1 + self.line_left_space, y0, 
-                                         fill="#FFBBEE", 
+                                         fill=color, 
                                          width=self.dy)
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x0 + self.line_left_space + 5, y0,
@@ -257,8 +271,8 @@ class ScheduleArea(tk.Frame):
     def calc_start_limit(self, df_items):
         df_items = self.arrange_df_with_order(df_items)
         idx_remaining_hour = []
+        remaining_hour = 9999
         for p_id, df in df_items.items():
-            remaining_hour = 9999
             for idx in df.index:
                 estimate_hour = max(0.25, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
                 r1 = remaining_hour - df.loc[idx, "Total_Estimate_Hour"]
@@ -278,9 +292,9 @@ class ScheduleArea(tk.Frame):
         x0, x1 = self.x00, self.x00
         column_days = {"Daily": 1, "Weekly": 5, "Monthly": 20}
         width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.SP.schedule_calender_type])
-        for _, idx, p_id, estimate_hour in self.idx_remaining_hour:
+        for remaining_hour, idx, p_id, estimate_hour in self.idx_remaining_hour:
             x1 += estimate_hour * width_scale
-            all_schedule_items[p_id].append((x0, x1, idx))
+            all_schedule_items[p_id].append((x0, x1, idx, remaining_hour))
             x0 = x1 * 1
         return all_schedule_items
 
