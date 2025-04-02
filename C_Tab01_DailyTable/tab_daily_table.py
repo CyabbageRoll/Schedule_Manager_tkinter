@@ -141,10 +141,13 @@ class DailyInformation(tk.Frame):
 
     def get_item_info(self, idx):
         info = []
-        for i in range(3):
+        for i in range(6):
             p_name, idx = self.SD[6 - i].loc[idx, ["Name", "Parent_ID"]]
             info.append(p_name)
         info = info[-1:0:-1]
+        info = [n for n in info if n != "-"]
+        if len(info) == 0:
+            info = ["-"]
         info = "-".join(info)
         return info
 
