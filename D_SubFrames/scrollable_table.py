@@ -6,7 +6,7 @@ from tkinter import ttk
 # import pandas as pd
 class ScrollableTable(tk.Frame):
     def __init__(self, master,
-                 df, show="headings", non_display_indices=[], widths=None, base_color="#bbbbbb",
+                 df, show="headings", non_display_indices=[], widths=None, base_color="#bbbbbb", init_row=0,
                  **kwargs):
         super().__init__(master, **kwargs)
         # self.logger = master.logger
@@ -14,6 +14,7 @@ class ScrollableTable(tk.Frame):
         self.df = df
         self.non_ids = non_display_indices
         self.base_color = base_color
+        self.init_row = init_row
         self.set_variables()
         self.set_widgets(widths, show)
         self.pack_widgets()
@@ -55,6 +56,8 @@ class ScrollableTable(tk.Frame):
                 continue
             self.w["tree"].insert("", "end", iid=idx, values=self.df.loc[idx, :].tolist(), tag=idx)
             self.w["tree"].tag_configure(idx, background=self.base_color)
+        if len(self.df.index) > self.init_row:
+            self.w["tree"].see(self.df.index[self.init_row])
 
     # 一つのセルの値を更新する
     def update_cell(self, index, column, value):

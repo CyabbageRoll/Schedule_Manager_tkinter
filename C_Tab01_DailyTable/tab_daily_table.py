@@ -46,7 +46,7 @@ class DailyInformation(tk.Frame):
         # 入力した予定の取り消し
         self.w["Buttons"] = sf.ButtonRow(self, buttons=[["Free", self.delete_item]])
         # 1日の予定入力欄
-        self.w["table"] = sf.ScrollableTable(self, df=self.df, widths=[100, 250, 250])
+        self.w["table"] = sf.ScrollableTable(self, df=self.df, widths=[100, 250, 250], init_row=self.SP.daily_begin_time*4)
 
     def pack_widgets(self):
         self.w["Info_area"].pack(side=tk.TOP, fill=tk.X, expand=False)

@@ -58,6 +58,8 @@ class ScrollableRegularlyArea(tk.Frame):
         self.w["area"].w["canvas"].bind("<ButtonPress-2>", self.mouse_click_right)
         self.w["area"].w["canvas"].bind("<ButtonPress-3>", self.mouse_click_right)
         self.w["area"].w["canvas"].bind("<B1-Motion>", self.do_drag)
+        self.w["area"].w["canvas"].bind("<MouseWheel>", self.mouse_wheel)
+        self.w["area"].w["canvas"].bind("<Alt-MouseWheel>", self.alt_mouse_wheel)
 
     def mouse_click(self, event):
         self.last_x = event.x
@@ -100,6 +102,12 @@ class ScrollableRegularlyArea(tk.Frame):
             # Update the last mouse position
             self.last_x = event.x
             self.last_y = event.y
+
+    def mouse_wheel(self, event):
+        self.w["area"].w["canvas"].yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def alt_mouse_wheel(self, event):
+        self.w["area"].w["canvas"].yview_scroll(int(-1*(event.delta/120)), "units")
 
     def update(self, mode):
         self.w["area"].update(mode)
