@@ -74,6 +74,7 @@ class DateInputBox(tk.Frame):
         str_date = str_date.replace(".", "/")
         str_date = str_date.replace(" ", "/")
         str_date = str_date.replace("／", "/")
+        str_date = str_date.replace("-", "/")
 
         d_date = None
         if len(str_date) < 3:

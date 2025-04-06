@@ -1,4 +1,4 @@
-from collections import OrderedDict, defaultdict
+from collections import OrderedDict, defaultdict, deque
 import tkinter as tk
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -69,8 +69,8 @@ class ScheduleArea(tk.Frame):
             self.create_calender_items()
         if mode in ["both", "prj"]:
             df_items = self.get_draw_items()
-            self.calc_start_limit(df_items)
-        all_schedule_items = self.calculate_x()
+            self.sort_idx_hour_list = self.calc_start_limit(df_items)
+        all_schedule_items = self.calculate_x_and_date_flag()
         self.draw_project_schedules(all_schedule_items)
         self.set_bind()
 
@@ -168,18 +168,21 @@ class ScheduleArea(tk.Frame):
         # アイテム表示
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == p_id]
-        for x0, x1, idx, remaining_hour in schedule_items:
+        for x0, x1, idx, available_flag, due_date_flag in schedule_items:
             ds = df.loc[idx]
-            # red_flag = remaining_hour - ds["Total_Estimate_Hour"] + ds["Actual_Hour"] < 0
-            # print(remaining_hour, ds["Total_Estimate_Hour"], ds["Actual_Hour"])
-            # print(red_flag)
-            red_flag = False
             y0 += self.dy
             order_idx = f"[{int(ds['OrderValue'])}]"
-            due_date = f" : ({ds['Plan_End_Date']})" if ds["Plan_End_Date"] else ""
+            start_date = f"{ds['Plan_Begin_Date']} " if ds["Plan_Begin_Date"] else ""
+            due_date = f"{ds['Plan_End_Date']}" if ds["Plan_End_Date"] else ""
+            date_info = f": ({start_date} -> {due_date})" if start_date or due_date else ""
             hours = f" : {ds['Actual_Hour']}/{ds['Total_Estimate_Hour']} [hr]"
-            text = f" {order_idx} {ds['Name']}" + hours + due_date
-            color = "#FFBBEE" if red_flag else "#99BBBB"
+            text = f" {order_idx} {ds['Name']}" + hours + date_info
+            color = "#FFBBEE" if due_date_flag else "#99BBBB"
+            if available_flag and start_date:
+                self.w["canvas"].create_line(x0 + self.line_left_space - 5, y0,
+                                             x0 + self.line_left_space, y0,
+                                             fill="#FF8888",
+                                             width=self.dy)
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x1 + self.line_left_space, y0, 
                                          fill=color, 
@@ -270,32 +273,77 @@ class ScheduleArea(tk.Frame):
 
     def calc_start_limit(self, df_items):
         df_items = self.arrange_df_with_order(df_items)
-        idx_remaining_hour = []
-        remaining_hour = 9999
+        idx_hour_list = []
+        # 親が同じ物事に開始しなければならない日を計算する
+        available_start_hour_dict = {}
+        tmp_estimate_hours = {}
+        # 前から順番に開始可能な時間を計算する
         for p_id, df in df_items.items():
-            for idx in df.index:
-                estimate_hour = max(0.25, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
-                r1 = remaining_hour - df.loc[idx, "Total_Estimate_Hour"]
-                due_date = df.loc[idx, "Plan_End_Date"]
-                # [ ] 開始可能日が設定されている場合は、ここか次のcalculate_xで対応が必要
-                if due_date == due_date:
-                    r2 = due_date.date() - datetime.date.today()
-                    r2 = r2.days * self.SP.daily_task_hour
-                else:
-                    r2 = 9999
-                remaining_hour = min(r1, r2)
-                idx_remaining_hour.append((remaining_hour, idx, p_id, estimate_hour))
-        self.idx_remaining_hour = sorted(idx_remaining_hour)
+            next_available_start_hour = 0.0
+            for idx in df.index[::-1]:
+                tmp_estimate_hours[idx] = max(0.25, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
+                available_start_hour_dict[idx] = next_available_start_hour
+                start_date = df.loc[idx, "Plan_Begin_Date"]
+                if start_date == start_date:
+                    start_days = start_date.date() - datetime.date.today() - datetime.timedelta(days=1)
+                    available_start_hour_dict[idx] = max(available_start_hour_dict[idx], start_days.days * self.SP.daily_task_hour)
+                next_available_start_hour = available_start_hour_dict[idx] + tmp_estimate_hours[idx]
 
-    def calculate_x(self):
+            # 後ろから順番に開始しなければならない時間を計算する
+            must_start_hour = 9999
+            for idx in df.index:
+                remaining_hours1 = must_start_hour - tmp_estimate_hours[idx]
+                # 自分自身の納期までの残り日数
+                due_date = df.loc[idx, "Plan_End_Date"]
+                remaining_hours2 = 9999
+                if due_date == due_date:
+                    remaining_days = due_date.date() - datetime.date.today()
+                    remaining_hours2 = remaining_days.days * self.SP.daily_task_hour - tmp_estimate_hours[idx]
+                must_start_hour = min(remaining_hours1, remaining_hours2)
+                idx_hour_list.append((must_start_hour, available_start_hour_dict[idx], idx, p_id, tmp_estimate_hours[idx]))
+        return sorted(idx_hour_list, reverse=True)
+
+
+    def calculate_x_and_date_flag(self):
         all_schedule_items = defaultdict(list)
         x0, x1 = self.x00, self.x00
         column_days = {"Daily": 1, "Weekly": 5, "Monthly": 20}
         width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.SP.schedule_calender_type])
-        for remaining_hour, idx, p_id, estimate_hour in self.idx_remaining_hour:
-            x1 += estimate_hour * width_scale
-            all_schedule_items[p_id].append((x0, x1, idx, remaining_hour))
+        current_hour = 0
+
+        pop_list = {"base": self.sort_idx_hour_list.copy(), "waiting": deque()}
+        while pop_list["base"] or pop_list["waiting"]:
+            turn_name = self.which_turn(pop_list, current_hour)
+            # リストの後ろから抽出し、baseから取り出してのてまだ開始できないものはwaitingに入れる
+            must_start_hour, available_start_hour, idx, p_id, estimate_hour = pop_list[turn_name].pop()
+            if turn_name == "base" and current_hour < available_start_hour:
+                pop_list["waiting"].appendleft((must_start_hour, available_start_hour, idx, p_id, estimate_hour))
+                continue
+
+            due_date_flag = True if current_hour > must_start_hour else False
+            available_flag = False
+            if current_hour < available_start_hour:
+                current_hour = available_start_hour
+                x0 = current_hour * width_scale + self.x00
+                available_flag = True
+            x1 = x0 + estimate_hour * width_scale
+            all_schedule_items[p_id].append((x0, x1, idx, available_flag, due_date_flag))
             x0 = x1 * 1
+            current_hour += estimate_hour
+
+            print(f"current_hour: {current_hour:0.1f}, MH: {must_start_hour}, AH:{available_start_hour}, {self.SD[6].loc[idx, 'Name']}")
         return all_schedule_items
+
+
+    def which_turn(self, pop_list, current_hour):
+        # どちらのリストから抽出するかを決める
+        if pop_list["waiting"] and pop_list["waiting"][-1][1] < current_hour:
+            turn_name = "waiting"
+        elif not pop_list["base"]:
+            turn_name = "waiting"
+        else:
+            turn_name = "base"
+        return turn_name
+
 
 
