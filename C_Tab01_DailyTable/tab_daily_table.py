@@ -39,7 +39,7 @@ class DailyInformation(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         input_rows = {}
-        for k in self.SD["daily_info"].columns[1:]:
+        for k in self.SD["daily_info"].columns[1:-1]:
             combo_list = vars(self.SP).get(f"daily_info_combo_{k}", [])
             input_rows[k] = ["combobox", ["", combo_list, "normal"]]
         self.w["Info_area"] = sf.InputListArea(self, input_rows=input_rows, label_width=12)
@@ -142,7 +142,10 @@ class DailyInformation(tk.Frame):
     def get_item_info(self, idx):
         info = []
         for i in range(6):
-            p_name, idx = self.SD[6 - i].loc[idx, ["Name", "Parent_ID"]]
+            if idx in self.SD[6-i].index:
+                p_name, idx = self.SD[6 - i].loc[idx, ["Name", "Parent_ID"]]
+            else:
+                p_name = "-"
             info.append(p_name)
         info = info[-1:0:-1]
         info = [n for n in info if n != "-"]
@@ -168,7 +171,7 @@ class DailyInformation(tk.Frame):
         self.calc_working_hours()
 
     def set_bind(self):
-        for k in self.SD["daily_info"].columns[1:]:
+        for k in self.SD["daily_info"].columns[1:-1]:
             self.w["Info_area"].w[k].w["Box"].bind("<Return>", lambda x, k=k: self.info_item_update_bind_func(k, x))
             self.w["Info_area"].w[k].w["Box"].bind("<FocusOut>", lambda x, k=k: self.info_item_update_bind_func(k, x))
 
@@ -180,6 +183,7 @@ class DailyInformation(tk.Frame):
         df_idx = self.generate_df_idx()
         self.SD["daily_info"].loc[df_idx, k] = txt
         self.SD["daily_info"].loc[df_idx, "Owner"] = self.SP.user
+        self.SD["daily_info"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.daily_info_update_bind()
 
     def generate_df_idx(self):
@@ -187,13 +191,12 @@ class DailyInformation(tk.Frame):
     
     def set_info_values(self):
         df_idx = self.generate_df_idx()
-        for k in self.SD["daily_info"].columns[1:]:
+        for k in self.SD["daily_info"].columns[1:-1]:
             v = self.SD["daily_info"].loc[df_idx, k] if df_idx in self.SD["daily_info"].index else ""
             if v == v and v is not None:
                 self.w["Info_area"].set(k, v)
             else:
                 self.w["Info_area"].set(k, "")
-
 
     def calc_working_hours(self):
         df_idx = self.generate_df_idx()
@@ -219,4 +222,5 @@ class DailyInformation(tk.Frame):
             self.SD["daily_sch"].loc[df_idx, "CFROM"] = working_from
             self.SD["daily_sch"].loc[df_idx, "CTO"] = self.column_name_list[working_to_idx]
             self.SD["daily_sch"].loc[df_idx, "CBREAK"] = working_break
+        self.SD["daily_sch"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         

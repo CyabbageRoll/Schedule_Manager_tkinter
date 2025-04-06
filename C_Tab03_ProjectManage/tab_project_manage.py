@@ -2,6 +2,7 @@
 from collections import OrderedDict
 import tkinter as tk
 from tkinter import messagebox
+import datetime
 # additional
 import pandas as pd
 # user
@@ -113,6 +114,8 @@ class ProjectManage(tk.Frame):
         return ds, type_warning, class_idx, current_idx
 
     def update_schedule_data(self, ds, class_idx):
+        ds["Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
+        print(ds["Last_Update"])
         self.SD[class_idx].loc[ds.name] = ds
         pid = ds["Parent_ID"]
 

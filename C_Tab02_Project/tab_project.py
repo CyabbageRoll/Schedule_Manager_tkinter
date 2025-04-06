@@ -61,7 +61,7 @@ class ProjectDisplay(tk.Frame):
             return
 
         tmp_idx = idx
-        for i in range(5):
+        for i in range(6):
             parent_item = self.w["Table"].w["tree"].parent(tmp_idx)
             if parent_item == "":
                 break

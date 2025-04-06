@@ -21,9 +21,21 @@ def read_schedule_data(db_dir):
     try:
         conn = sqlite3.connect(prj_db_path)
         for i, table in enumerate(schedule_tables):
-            # 子供が残っているprojectをDoneにできない処理を作るまでは全部読み込む。
-            # [ ] いずれは、Done、 Cancelで日付が1ヶ月前以上のものは読み込まない設定を入れたい
-            sql_select = f"SELECT * FROM {table} where Status in ('ToDo', 'Done', 'Cancel', 'Regularly')"
+            sql_select1 = f"SELECT * FROM {table} where Status in ('ToDo', 'Done', 'Cancel', 'Regularly')"
+
+            sql_select2 = f"""
+            SELECT *
+            FROM {table}
+            WHERE (Status IN ('ToDo', 'Regularly'))
+            OR (Status IN ('Done', 'Cancel') AND Last_Update >= DATE('now', '-2 days'));
+            """
+            if i < 5:
+                sql_select = sql_select1
+            else:
+                # [ ]現状未実装
+                # 子供がいるTask以上はDoneにできない、また、親がDoneになっていたらToDoに戻せない設定が必要
+                sql_select = sql_select1
+
             SD[i + 1] = pd.read_sql_query(sql_select, conn)
             SD[i + 1].set_index('IDX', inplace=True)
     except Exception as e:
@@ -59,6 +71,17 @@ def save_schedule_data(SD, db_dir, user_name):
 
 def upsert_sql_with_df(df, db_path, table_name, user_name):
     df = df[df["Owner"] == user_name].copy()
+    df2 = df["Last_Update"].copy()
+    update_ids = []
+
+    for idx in df2.index:
+        last_update = df2[idx]
+        last_update = pd.to_datetime(last_update, errors='coerce').date()
+        c_date = (pd_today() - pd.DateOffset(days=2)).date()
+        if last_update and last_update > c_date:
+                update_ids.append(idx)
+    df = df[df.index.isin(update_ids)]
+
     try:
         # データベースに接続
         conn = sqlite3.connect(db_path)
@@ -122,8 +145,8 @@ def create_new_prj_db(db_path):
 def create_new_daily_db(db_path):
     DAILY_TABLE = ["IDX", "Owner"] + \
                   [f"C{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)] + \
-                  ["CTOTAL", "CFROM", "CTO", "CBREAK"]
-    DAILY_ITEMS = ["IDX", "Owner", "Health", "Work_Place", "Safety", "OverWork", "Info1", "Info2", "Info3"]
+                  ["CTOTAL", "CFROM", "CTO", "CBREAK", "Last_Update"]
+    DAILY_ITEMS = ["IDX", "Owner", "Health", "Work_Place", "Safety", "OverWork", "Info1", "Info2", "Info3", "Last_Update"]
     daily_table_columns = ", ".join([f"{item} TEXT" for item in DAILY_TABLE])
     daily_items_columns = ", ".join([f"{item} TEXT" for item in DAILY_ITEMS])
     

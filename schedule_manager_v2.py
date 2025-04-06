@@ -96,6 +96,7 @@ class ScheduleManager(tk.Tk):
 
     def status_update(self, class_idx, idx, status):
         self.SD[class_idx].loc[idx, "Status"] = status
+        self.SD[class_idx].loc[idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.refresh()
 
     def refresh(self):
