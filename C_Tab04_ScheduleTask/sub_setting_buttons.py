@@ -40,6 +40,7 @@ class SettingButtons(tk.Frame):
                                             combo_list=self.calender_list)
         self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=self.GP.schedule_font_size)
         self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=self.SP.schedule_width)
+        self.w["day_hour"] = sf.UpDownBox(self, label="h/day", min_value=1, max_value=10, init_value=self.SP.daily_task_hour)
         self.w["color_label"] = tk.Label(self, text="BackColor", font=self.font)
         self.w["color"] = sf.ColorSelector(self, init_color=self.GP.schedule_bg_color)
 
@@ -68,6 +69,9 @@ class SettingButtons(tk.Frame):
 
     def get_width(self):
         return self.w["width"].get()
+    
+    def get_day_hour(self):
+        return self.w["day_hour"].get()
     
     def get_calender_type(self):
         return self.w["date_type"].get()

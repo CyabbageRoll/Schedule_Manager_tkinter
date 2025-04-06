@@ -65,7 +65,7 @@ class ScheduleArea(tk.Frame):
         """
         self.unbind()
         self.refresh_canvas_and_parameters()
-        if mode in ["both", "calender", "width"]:
+        if mode in ["both", "calender", "width", "day_hour"]:
             self.create_calender_items()
         if mode in ["both", "prj"]:
             df_items = self.get_draw_items()
@@ -331,7 +331,7 @@ class ScheduleArea(tk.Frame):
             x0 = x1 * 1
             current_hour += estimate_hour
 
-            print(f"current_hour: {current_hour:0.1f}, MH: {must_start_hour}, AH:{available_start_hour}, {self.SD[6].loc[idx, 'Name']}")
+            # print(f"current_hour: {current_hour:0.1f}, MH: {must_start_hour}, AH:{available_start_hour}, {self.SD[6].loc[idx, 'Name']}")
         return all_schedule_items
 
 

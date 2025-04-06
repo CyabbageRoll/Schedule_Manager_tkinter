@@ -15,6 +15,8 @@ class ProjectDisplay(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.edit_att_menu_click = None
+        self.edit_ticket_menu_click = None
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -44,11 +46,35 @@ class ProjectDisplay(tk.Frame):
         self.set_init()
 
     def set_init(self):
+        self.w["Table"].save_expanded_state()
         self.w["Table"].delete_current_items()
         self.w["Table"].set_init()
+        self.w["Table"].restore_expanded_state()
 
     def set_bind(self):
-        pass
+        self.w["Table"].w["tree"].bind("<ButtonPress-2>", self.mouse_click_right)
+        self.w["Table"].w["tree"].bind("<ButtonPress-3>", self.mouse_click_right)
+
+    def mouse_click_right(self, event):
+        idx = self.w["Table"].w["tree"].selection()
+        if not idx:
+            return
+
+        tmp_idx = idx
+        for i in range(5):
+            parent_item = self.w["Table"].w["tree"].parent(tmp_idx)
+            if parent_item == "":
+                break
+            tmp_idx = parent_item
+        class_idx = i + 1
+        self.show_menu(event, class_idx, idx[0])
+
+    def show_menu(self, event, class_idx, idx):
+        # メニューを指定した位置に表示
+        popup_menu = tk.Menu(self, tearoff=0)
+        popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
+        popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
+        popup_menu.post(event.x_root, event.y_root)
 
 
 class ScrollableTableTree(sf.ScrollableTable):
@@ -74,3 +100,20 @@ class ScrollableTableTree(sf.ScrollableTable):
     def delete_current_items(self):
         for item in self.w["tree"].get_children():
             self.w["tree"].delete(item)
+
+    def save_expanded_state(self):
+        # 再帰的に展開されているアイテムのIDを保存
+        self.expanded_items = []
+        self._save_expanded_state_recursive('')
+
+    def _save_expanded_state_recursive(self, parent):
+        for item in self.w["tree"].get_children(parent):
+            if self.w["tree"].item(item, 'open'):
+                self.expanded_items.append(item)
+                # 子アイテムも再帰的にチェック
+                self._save_expanded_state_recursive(item)
+
+    def restore_expanded_state(self):
+        for item in self.expanded_items:
+            if self.w["tree"].exists(item):
+                self.w["tree"].item(item, open=True)

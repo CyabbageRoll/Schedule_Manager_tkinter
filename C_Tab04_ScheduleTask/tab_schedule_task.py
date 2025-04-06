@@ -43,12 +43,14 @@ class ScheduleTask(tk.Frame):
         self.w["inp_box"].update_date_combo_func = lambda: self.update_func("calender")
         self.w["inp_box"].w["font"].add_bind_func = lambda: self.update_func("font")
         self.w["inp_box"].w["width"].add_bind_func = lambda: self.update_func("width")
+        self.w["inp_box"].w["day_hour"].add_bind_func = lambda: self.update_func("day_hour")
         self.w["inp_box"].w["color"].add_bind_func = lambda: self.update_func("color")
         self.w["schedule"].w["area"].label_update_func = self.set_label
 
     def update_func(self, mode=None):
         self.GP.schedule_font_size = int(self.w["inp_box"].get_font_size())
         self.SP.schedule_width = int(self.w["inp_box"].get_width())
+        self.SP.daily_task_hour = int(self.w["inp_box"].get_day_hour())
         self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
         if mode == "prj":
             prj_type = self.w["inp_box"].get_prj_type()

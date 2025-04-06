@@ -15,7 +15,7 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.VER = "v2-r20250402"
+        self.VER = "v2-r20250406"
         self.logger = ut.logger_settings(add_info=self.VER)
         p_dir = os.path.dirname(__file__)
         self.json_rw = DS.JSONReadWrite(p_dir, self.logger)
@@ -71,6 +71,8 @@ class ScheduleManager(tk.Tk):
         self.mw.w["Regularly"].w["regularly"].edit_ticket_menu_click = self.edit_ticket
         self.mw.w["Regularly"].w["regularly"].edit_att_menu_click = self.edit_att
         self.mw.w["Regularly"].w["regularly"].status_update = self.status_update
+        self.mw.w["Projects-Display"].edit_ticket_menu_click = self.edit_ticket
+        self.mw.w["Projects-Display"].edit_att_menu_click = self.edit_att
         self.ob.get_memo_dict = self.mw.w["Memo"].get_to_memo_dict
         self.ob.refresh_bind_func = self.refresh
 

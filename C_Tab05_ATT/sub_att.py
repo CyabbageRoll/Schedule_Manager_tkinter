@@ -92,8 +92,8 @@ class ATT(tk.Frame):
 
     def button_apply(self):
         df = self.w["table"].df
-        print(f"{df=}")
-        print(f"{self.SD[self.class_idx]=}")
+        # print(f"{df=}")
+        # print(f"{self.SD[self.class_idx]=}")
         if self.parent[0] == "0":
             color_dic = sf.generate_color_dict()
             color = random.choice(list(color_dic.keys()))
