@@ -22,6 +22,7 @@ class RecentArea(tk.Frame):
         self.x00 = 10
         self.line_left_space = 30
         self.y00 = 10
+        self.status_color_dict = {"ToDo": "#FFAAAA", "Done": "#AAFFAA", "Cancel": "#BBBBBB", "Regularly": "#AAAAFF"}
         self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
@@ -64,9 +65,9 @@ class RecentArea(tk.Frame):
         """
         self.unbind()
         self.refresh_canvas_and_parameters()
-        df_items = self.get_draw_items(display_date)
-        all_schedule_items = self.arrange_df_hours(df_items)
-        self.draw_project_schedules(all_schedule_items)
+        df_items, display_item_hours = self.get_draw_items(display_date)
+        all_schedule_items = self.arrange_df_hours(df_items, display_item_hours)
+        self.draw_project_schedules(all_schedule_items, display_item_hours)
         self.set_bind()
 
     def set_bind(self):
@@ -121,13 +122,13 @@ class RecentArea(tk.Frame):
         pass
 
     # 順番にスケジュールを表示させる
-    def draw_project_schedules(self, all_schedule_items):
+    def draw_project_schedules(self, all_schedule_items, display_item_hours):
         y0 = self.y00 * 1
         for p_id, schedule_items in all_schedule_items.items():
-            y0 = self.draw_single_project_schedule(p_id, y0, schedule_items)
+            y0 = self.draw_single_project_schedule(p_id, y0, schedule_items, display_item_hours)
 
     # 1つの束のスケジュールを表示させる
-    def draw_single_project_schedule(self, p_id, y0, schedule_items):
+    def draw_single_project_schedule(self, p_id, y0, schedule_items, display_item_hours):
         # 親の表示
         df_p = self.SD[self.class_idx-1]
         ds_p = df_p.loc[p_id]
@@ -147,8 +148,13 @@ class RecentArea(tk.Frame):
         for x0, x1, idx in schedule_items:
             ds = df.loc[idx]
             y0 += self.dy
-            hours = f" : {ds['Actual_Hour']} [hr]"
+            hours = f" (In term: {display_item_hours[idx]} / Total: {ds['Actual_Hour']} [hr])"
             text = f"{ds['Name']}" + hours
+            cr = self.dy * 0.3
+            self.w["canvas"].create_oval(x0 + self.line_left_space - cr * 2.4 , y0 - cr,
+                                         x0 + self.line_left_space - cr * 0.4, y0 + cr, 
+                                         fill=self.status_color_dict[ds["Status"]], 
+                                         outline=self.status_color_dict[ds["Status"]])
             self.w["canvas"].create_line(x0 + self.line_left_space, y0,
                                          x1 + self.line_left_space, y0, 
                                          fill="#FFBBEE", 
@@ -183,28 +189,26 @@ class RecentArea(tk.Frame):
         from_date, to_date = display_date
         day_count = (to_date - from_date).days
         display_date_list = [from_date + datetime.timedelta(days=i) for i in range(day_count + 1)]
-        print(display_date_list)
         display_date_indices = [str(d) + "-" + self.OB["Member"] for d in display_date_list]
-        print(display_date_indices)
-        display_items = defaultdict(int)
+        display_item_hours = defaultdict(int)
         daily_column_name_list = [f"C{i//4:02d}{(i%4)*15:02d}" for i in range(24*4)]
         for sch_idx in display_date_indices:
             if sch_idx in self.SD["daily_sch"].index:
                 for idx in self.SD["daily_sch"].loc[sch_idx, daily_column_name_list]:
                     if idx:
-                        display_items[idx] += 0.25
+                        display_item_hours[idx] += 0.25
 
-        df = self.SD[6].loc[display_items.keys(), :]
+        df = self.SD[self.class_idx].loc[display_item_hours.keys(), :].copy()
         p_ids = df["Parent_ID"].unique()
         df_items = {p_id: df[df["Parent_ID"] == p_id] for p_id in p_ids}
-        return df_items
+        return df_items, display_item_hours
 
-    def arrange_df_hours(self, df_items):
+    def arrange_df_hours(self, df_items, display_item_hours):
         all_schedule_items = defaultdict(list)
         for p_id, df in df_items.items():
             df = df.sort_values(by="Actual_Hour", ascending=False)
             for idx in df.index:
-                x1 = self.x00 + df.loc[idx, "Actual_Hour"] * self.width_scale
+                x1 = self.x00 + display_item_hours[idx] * self.width_scale
                 all_schedule_items[p_id].append((self.x00, x1, idx))
         return all_schedule_items
     

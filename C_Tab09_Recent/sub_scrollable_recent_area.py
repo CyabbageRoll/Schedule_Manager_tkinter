@@ -80,10 +80,10 @@ class ScrollableRecentArea(tk.Frame):
     def show_menu(self, event, class_idx, idx):
         # メニューを指定した位置に表示
         popup_menu = tk.Menu(self, tearoff=0)
-        popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
-        popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
-        popup_menu.add_separator()
-        popup_menu.add_command(label="DONE", command=lambda : self.status_update(class_idx, idx, "DONE"))
+        # popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
+        # popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
+        # popup_menu.add_separator()
+        popup_menu.add_command(label="Done", command=lambda : self.status_update(class_idx, idx, "Done"))
         popup_menu.add_command(label="Cancel", command=lambda : self.status_update(class_idx, idx, "Cancel"))
         popup_menu.add_command(label="Regularly", command=lambda : self.status_update(class_idx, idx, "Regularly"))
         popup_menu.add_command(label="ToDo", command=lambda : self.status_update(class_idx, idx, "ToDo"))

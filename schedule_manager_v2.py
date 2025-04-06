@@ -71,6 +71,9 @@ class ScheduleManager(tk.Tk):
         self.mw.w["Regularly"].w["regularly"].edit_ticket_menu_click = self.edit_ticket
         self.mw.w["Regularly"].w["regularly"].edit_att_menu_click = self.edit_att
         self.mw.w["Regularly"].w["regularly"].status_update = self.status_update
+        self.mw.w["Recent"].w["recent"].edit_ticket_menu_click = self.edit_ticket
+        self.mw.w["Recent"].w["recent"].edit_att_menu_click = self.edit_att
+        self.mw.w["Recent"].w["recent"].status_update = self.status_update
         self.mw.w["Projects-Display"].edit_ticket_menu_click = self.edit_ticket
         self.mw.w["Projects-Display"].edit_att_menu_click = self.edit_att
         self.ob.get_memo_dict = self.mw.w["Memo"].get_to_memo_dict
@@ -99,6 +102,7 @@ class ScheduleManager(tk.Tk):
         self.logger.debug("refresh")
         self.mw.w["Schedule"].update()
         self.mw.w["Regularly"].update()
+        self.mw.w["Recent"].update()
         self.mw.w["Projects-Display"].refresh_button_press()
         self.sw.w["Daily"].refresh()
         self.mw.w["Team"].refresh()

@@ -84,7 +84,7 @@ class ScrollableTableTree(sf.ScrollableTable):
 
     def set_init(self):
         columns = self.df.columns.tolist()
-        for i in range(5):
+        for i in range(6):
             for idx in self.SD[i+1].index:
                 p_id = self.SD[i+1].loc[idx, "Parent_ID"]
                 name = self.SD[i+1].loc[idx, "Name"]
