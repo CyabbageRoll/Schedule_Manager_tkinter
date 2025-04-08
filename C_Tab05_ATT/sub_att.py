@@ -63,6 +63,7 @@ class ATT(tk.Frame):
         self.class_idx = self.w["selector"].class2idx[selected_class] + 1
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == parent[0]]
+        df = df[df["Owner"] == self.SP.user]
         df = df[["OrderValue", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]]
         self.update_table_contents(df)
 
