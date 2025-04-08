@@ -40,7 +40,7 @@ class Regularly(tk.Frame):
 
     def set_bind(self):
         # self.w["inp_box"].update_prj_combo_func = lambda: self.update_func("prj")
-        # self.w["inp_box"].update_date_combo_func = lambda: self.update_func("calender")
+        # self.w["inp_box"].update_date_combo_func = lambda: self.update_func("calendar")
         # self.w["inp_box"].w["font"].add_bind_func = lambda: self.update_func("font")
         # self.w["inp_box"].w["width"].add_bind_func = lambda: self.update_func("width")
         # self.w["inp_box"].w["color"].add_bind_func = lambda: self.update_func("color")
@@ -52,8 +52,8 @@ class Regularly(tk.Frame):
         self.GP.schedule_bg_color = str(self.w["inp_box"].get_bg_color())
         # if mode == "prj":
         #     self.w["regularly"].w["area"].class_idx = self.w["inp_box"].get_prj_type()
-        # if mode == "calender":
-        #     self.w["regularly"].w["area"].calender_type = self.w["inp_box"].get_calender_type()
+        # if mode == "calendar":
+        #     self.w["regularly"].w["area"].calendar_type = self.w["inp_box"].get_calendar_type()
         self.w["regularly"].update(mode)
 
     def update(self, mode=None):

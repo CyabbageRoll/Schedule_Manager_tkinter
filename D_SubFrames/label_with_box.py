@@ -134,6 +134,8 @@ class LabelEntryBox(LabelBoxBase):
         supported_type = ["str", "int", "float"]
         assert input_type in supported_type, f"{input_type} is not supported"
         self.input_type = input_type
+        self.bind_func_return_callback = None
+        self.bind_func_focus_out_callback = None
         self.initialize()
 
     def set_widgets(self):
@@ -147,6 +149,8 @@ class LabelEntryBox(LabelBoxBase):
     def set_bind(self):
         self.w["Box"].bind("<Return>", self.warning_type_miss_match)
         self.w["Box"].bind("<FocusOut>", self.warning_type_miss_match)
+        self.w["Box"].bind("<Return>", self.bind_func_return)
+        self.w["Box"].bind("<FocusOut>", self.bind_func_focus_out)
 
     def warning_type_miss_match(self, event):
         if self.type_check():
@@ -154,6 +158,14 @@ class LabelEntryBox(LabelBoxBase):
             self.w["Box"].configure(bg="LightGrey")
         else:
             self.w["Box"].configure(bg="red")
+
+    def bind_func_return(self, event):
+        if self.bind_func_return_callback is not None:
+            self.bind_func_return_callback()
+
+    def bind_func_focus_out(self, event):
+        if self.bind_func_focus_out_callback is not None:
+            self.bind_func_focus_out_callback()
 
     def type_check(self):
         if self.input_type == "str":
@@ -180,6 +192,12 @@ class LabelEntryBox(LabelBoxBase):
             return True
         except:
             return False
+        
+    def get(self):
+        return self.w["Box"].get()
+    
+    def set(self, str):
+        self.value.set(str)
 
 
 class InputListArea(tk.Frame):

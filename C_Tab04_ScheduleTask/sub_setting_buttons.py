@@ -24,7 +24,7 @@ class SettingButtons(tk.Frame):
     def set_variables(self):
         self.class_list = ["Project1", "Project2", "Project3", "Project4", "Task"]
         self.class_dict = {k: i + 2 for i, k in enumerate(self.class_list)}
-        self.calender_list = ["Daily", "Weekly", "Monthly"]
+        self.calendar_list = ["Daily", "Weekly", "Monthly"]
 
     def set_widgets(self):
         self.w = OrderedDict()
@@ -33,11 +33,11 @@ class SettingButtons(tk.Frame):
                                            init_value=self.class_list[self.SP.schedule_prj_type-2],
                                            state="readonly",
                                            combo_list=self.class_list)
-        self.w["date_type"] = sf.LabelCombo(self, label_txt="Calender Type",
+        self.w["date_type"] = sf.LabelCombo(self, label_txt="Calendar Type",
                                             label_width=15,
-                                            init_value=self.SP.schedule_calender_type,
+                                            init_value=self.SP.schedule_calendar_type,
                                             state="readonly",
-                                            combo_list=self.calender_list)
+                                            combo_list=self.calendar_list)
         self.w["font"] = sf.UpDownBox(self, label="font_size", min_value=1, max_value=100, init_value=self.GP.schedule_font_size)
         self.w["width"] = sf.UpDownBox(self, label="task_width", min_value=1, max_value=100, init_value=self.SP.schedule_width)
         self.w["day_hour"] = sf.UpDownBox(self, label="h/day", min_value=1, max_value=10, init_value=self.SP.daily_task_hour)
@@ -73,7 +73,7 @@ class SettingButtons(tk.Frame):
     def get_day_hour(self):
         return self.w["day_hour"].get()
     
-    def get_calender_type(self):
+    def get_calendar_type(self):
         return self.w["date_type"].get()
     
     def get_prj_type(self):

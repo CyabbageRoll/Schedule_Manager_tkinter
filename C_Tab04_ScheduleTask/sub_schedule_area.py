@@ -23,7 +23,7 @@ class ScheduleArea(tk.Frame):
         self.x00 = 10
         self.line_left_space = 15
         self.y00 = 10
-        self.max_columns = 100
+        self.max_columns = 500
         self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.color_dict = sf.generate_color_dict()
         self.on_canvas_items_idx = []
@@ -61,12 +61,12 @@ class ScheduleArea(tk.Frame):
     def update(self, mode=None):
         """スケジュールエリアの更新
         Args:
-            mode (str, optional): calender, width: カレンダの表示や幅を変える. prj: 描画するプロジェクトを更新. both: 両方. Defaults to None.
+            mode (str, optional): calendar, width: カレンダの表示や幅を変える. prj: 描画するプロジェクトを更新. both: 両方. Defaults to None.
         """
         self.unbind()
         self.refresh_canvas_and_parameters()
-        if mode in ["both", "calender", "width", "day_hour"]:
-            self.create_calender_items()
+        if mode in ["both", "calendar", "width", "day_hour"]:
+            self.create_calendar_items()
         if mode in ["both", "prj"]:
             df_items = self.get_draw_items()
             self.sort_idx_hour_list = self.calc_start_limit(df_items)
@@ -137,7 +137,7 @@ class ScheduleArea(tk.Frame):
         ds_p = df_p.loc[p_id]
         names = self.get_parent_name(self.class_idx-1, p_id)
         ye = self.dy * (len(schedule_items) + 2)
-        self.w["canvas"].create_line(self.x00, y0+self.dy/2, self.x00 + 10000, y0+self.dy/2,
+        self.w["canvas"].create_line(self.x00, y0+self.dy/2, self.x00 + 100000, y0+self.dy/2,
                                      fill="#99AABB")
         self.w["canvas"].create_line(self.x00+self.line_left_space/2-1, y0-self.dy/2, self.x00+self.line_left_space/2-1, y0+ye,
                                      fill=self.color_dict[ds_p["Color"]],
@@ -152,16 +152,16 @@ class ScheduleArea(tk.Frame):
         y0 += self.dy * 1
         ye = y0 + self.dy * (len(schedule_items) + 1)
         xs = self.x00 + self.line_left_space
-        for x0, x1, str_dd in self.calender_items:
+        for x0, x1, str_dd in self.calendar_items:
             self.w["canvas"].create_text(xs + (x0 + x1) / 2, y0, 
                                          text=str_dd, anchor="center",
                                          font=(self.GP.font_family, self.GP.schedule_font_size))
             self.w["canvas"].create_line(xs + x0, y0-self.dy/2, xs + x0, ye,
                                          fill="#99AABB")
 
-            self.w["canvas"].create_line(self.x00 + self.line_left_space, y0+self.dy/2, self.x00+10000, y0+self.dy/2,
+            self.w["canvas"].create_line(self.x00 + self.line_left_space, y0+self.dy/2, self.x00+100000, y0+self.dy/2,
                                          fill="#99AABB")
-            self.w["canvas"].create_line(self.x00 + self.line_left_space, ye, self.x00+10000, ye,
+            self.w["canvas"].create_line(self.x00 + self.line_left_space, ye, self.x00+100000, ye,
                                          fill="#99AABB")
         y0 += self.dy * 0.2
 
@@ -213,21 +213,33 @@ class ScheduleArea(tk.Frame):
             s += " (" + " - ".join(p_names) + ") "
         return s
     
-    def create_calender_items(self):
+    def create_calendar_items(self):
         w = self.SP.schedule_width * self.width_scale
-        self.calender_items = []
+        self.calendar_items = []
         x0 = 0
         time_delta_dict = {"Daily": datetime.timedelta(days=1),
                            "Weekly": datetime.timedelta(weeks=1),
                            "Monthly": relativedelta(months=1)
                            }
-        time_delta = time_delta_dict[self.SP.schedule_calender_type]
-        dd = datetime.date.today()
-        for _ in range(self.max_columns):
-            x1 = x0 + w
+        column_num_dict = {"Daily": self.max_columns,
+                           "Weekly": self.max_columns // 5,
+                           "Monthly": self.max_columns // 20
+                           }
+        time_delta = time_delta_dict[self.SP.schedule_calendar_type]
+        dd = datetime.date.today() - time_delta
+
+        for _ in range(column_num_dict[self.SP.schedule_calendar_type]):
             dd += time_delta
-            str_dd = dd.strftime("%m/%d")
-            self.calender_items.append((x0, x1, str_dd))
+            str_date = dd.strftime("%Y/%m/%d")
+            str_weekday = dd.strftime("%a").upper()
+            if self.SP.schedule_calendar_type == "Daily":
+                if str_date in self.SP.schedule_holidays or str_weekday in self.SP.schedule_holidays:
+                    continue
+            x1 = x0 + w
+            str_dd = f"{dd.strftime('%m/%d')}"
+            if self.SP.schedule_calendar_type == "Daily":
+                str_dd += f" ({str_weekday})" 
+            self.calendar_items.append((x0, x1, str_dd))
             x0 = x1
 
     def get_draw_items(self):
@@ -308,7 +320,7 @@ class ScheduleArea(tk.Frame):
         all_schedule_items = defaultdict(list)
         x0, x1 = self.x00, self.x00
         column_days = {"Daily": 1, "Weekly": 5, "Monthly": 20}
-        width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.SP.schedule_calender_type])
+        width_scale = self.SP.schedule_width * self.width_scale / (self.SP.daily_task_hour * column_days[self.SP.schedule_calendar_type])
         current_hour = 0
 
         pop_list = {"base": self.sort_idx_hour_list.copy(), "waiting": deque()}
