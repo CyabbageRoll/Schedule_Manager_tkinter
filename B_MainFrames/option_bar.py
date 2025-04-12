@@ -43,7 +43,7 @@ class OptionBar(tk.Frame):
             widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     def save_button(self):
-        DS.save_schedule_data(self.SD, self.SP.server_dir, self.SP.user)
+        DS.save_schedule_data(self.logger, self.SD, self.SP.server_dir, self.SP.user)
         self.logger.debug("save schedule data")
         self.get_memo_dict()
         self.json_rw.write(self.SP.server_dir, SP=self.SP, GP=self.GP, MEMO=self.MEMO)
@@ -51,7 +51,7 @@ class OptionBar(tk.Frame):
         self.load_button()
 
     def load_button(self):
-        SD = DS.read_schedule_data(self.SP.server_dir)
+        SD = DS.read_schedule_data(self.logger, self.SP.server_dir)
         for key, df in SD.items():
             self.SD[key] = df
         self.logger.debug("read schedule data")

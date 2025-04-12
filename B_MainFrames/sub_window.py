@@ -49,4 +49,4 @@ class SubWindow(ttk.Notebook):
         ds.save_df_as_pkl(self.SD, self.SP.server_dir)
 
     def load_button(self):
-        self.SD = ds.read_schedule_data(self.SP.server_dir)
+        self.SD = ds.read_schedule_data(self.logger, self.SP.server_dir)

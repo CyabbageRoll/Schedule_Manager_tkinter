@@ -16,11 +16,12 @@ class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
         self.VER = "v2-r20250406"
-        self.logger = ut.logger_settings(add_info=self.VER)
         p_dir = os.path.dirname(__file__)
+        log_file = os.path.join(p_dir, "./log/debug.log")
+        self.logger = ut.logger_settings(log_file=log_file, add_info=self.VER)
         self.json_rw = DS.JSONReadWrite(p_dir, self.logger)
         self.SP, self.GP, self.MEMO = self.json_rw.read()
-        self.SD = DS.read_schedule_data(self.SP.server_dir)
+        self.SD = DS.read_schedule_data(self.logger, self.SP.server_dir)
         self.OB = {"Member": self.SP.user, "Date": datetime.date.today().strftime(r"%Y-%m-%d")}
         self.tk_setting()
         self.set_frames()

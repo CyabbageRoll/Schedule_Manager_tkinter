@@ -6,14 +6,16 @@ import pandas as pd
 import sqlite3
 
 
-def read_schedule_data(db_dir):
+def read_schedule_data(logger, db_dir):
     # DBがない時は新規で作成する
     prj_db_path = Path(db_dir) / "Projects.sqlite"
     day_db_path = Path(db_dir) / "Daily.sqlite"
     if not prj_db_path.exists():
         create_new_prj_db(prj_db_path)
+        logger.debug(f"create new project database {prj_db_path}")
     if not day_db_path.exists():
         create_new_daily_db(day_db_path)
+        logger.debug(f"create new daily database {day_db_path}")
     
     SD = {}
     # Projectデータの読み込み
@@ -36,10 +38,13 @@ def read_schedule_data(db_dir):
                 # 子供がいるTask以上はDoneにできない、また、親がDoneになっていたらToDoに戻せない設定が必要
                 sql_select = sql_select1
 
+            logger.debug(f"fetch schedule data {table} {sql_select}")
             SD[i + 1] = pd.read_sql_query(sql_select, conn)
             SD[i + 1].set_index('IDX', inplace=True)
+            logger.debug(f"fetch schedule data {table} {SD[i + 1].shape}")
     except Exception as e:
         print(f"fetch schedule data {table} {e}")
+        logger.debug(f"fetch schedule data {table} {e}")
     finally:
         conn.close()
     # Dailyデータの読み込み
@@ -48,28 +53,33 @@ def read_schedule_data(db_dir):
         conn = sqlite3.connect(day_db_path)
         for table in daily_tables:
             sql_select = f"SELECT * FROM {table}"
+            logger.debug(f"fetch daily data {table} {sql_select}")
             SD[table] = pd.read_sql_query(sql_select, conn)
             SD[table].set_index('IDX', inplace=True)
+            logger.debug(f"fetch daily data {table} {SD[table].shape}")
     except Exception as e:
         print(f"fetch daily data {table} {e}")
+        logger.debug(f"fetch daily data {table} {e}")
     finally:
         conn.close()
     
     return SD
 
 
-def save_schedule_data(SD, db_dir, user_name):
+def save_schedule_data(logger, SD, db_dir, user_name):
     prj_db_path = Path(db_dir) / "Projects.sqlite"
     day_db_path = Path(db_dir) / "Daily.sqlite"
+    logger.debug(f"save schedule data {prj_db_path}")
+    logger.debug(f"save schedule data {day_db_path}")
     # Projectデータの保存
     for i, table in enumerate(["prj1", "prj2", "prj3", "prj4", "task", "ticket"]):
-        upsert_sql_with_df(SD[i + 1], prj_db_path, table, user_name)
+        upsert_sql_with_df(logger, SD[i + 1], prj_db_path, table, user_name)
     # Dailyデータの保存
     for table in ["daily_sch", "daily_info"]:
-        upsert_sql_with_df(SD[table], day_db_path, table, user_name)
+        upsert_sql_with_df(logger, SD[table], day_db_path, table, user_name)
 
 
-def upsert_sql_with_df(df, db_path, table_name, user_name):
+def upsert_sql_with_df(logger, df, db_path, table_name, user_name):
     df = df[df["Owner"] == user_name].copy()
     df2 = df["Last_Update"].copy()
     update_ids = []
@@ -94,13 +104,16 @@ def upsert_sql_with_df(df, db_path, table_name, user_name):
             indices = ", ".join([f"'{i}'" for i in df_existing.index])
             sql = f"DELETE FROM {table_name} WHERE IDX IN ({indices})"
             conn.execute(sql)
+            logger.debug(f"delete existing data from {table_name} in upsert process {sql}")
             # ここではcommitしない。to_sqlで無事に実行された時にcommitされる
         # 新規のデータを追加する
         df_tmp = df.copy()
         df_tmp = df_tmp.reset_index().rename(columns={'index': 'IDX'})
         df_tmp.to_sql(table_name, conn, if_exists='append', index=False, method='multi')
+        logger.debug(f"save schedule data {table_name} {df_tmp.shape}")
     except Exception as e:
         print(f"save schedule data {table_name} {e}")
+        logger.debug(f"save schedule data {table_name} {e}")
     finally:    
         conn.close()
 

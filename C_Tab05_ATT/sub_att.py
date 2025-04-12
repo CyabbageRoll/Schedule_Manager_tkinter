@@ -2,6 +2,7 @@
 import random
 from collections import OrderedDict
 import tkinter as tk
+from tkinter import ttk
 import datetime
 # additional
 import pandas as pd
@@ -27,7 +28,7 @@ class ATT(tk.Frame):
 
     def set_variables(self):
         self.msg = tk.StringVar()
-        columns = ["OrderValue", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]
+        columns = ["OrderValue", "Name", "Status", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Memo"]
         rows = {i: [""]*len(columns) for i in range(1)}
         self.df = pd.DataFrame.from_dict(data=rows, columns=columns, orient="index")
 
@@ -54,18 +55,31 @@ class ATT(tk.Frame):
             widget.pack(side=tk.TOP, fill=f, expand=e)
 
     def set_init(self):
+        self.msg.set(f"Ambitious Target Tree")
+        self.button_style_prepare()
         self.w["selector"].call_back_changed = self.project_select_changed
         self.w["selector"].prj_select_changed(None, 0)
 
+    def button_style_prepare(self):
+        self.base_apply_button_style = self.w["button_apply"].w["APPLY"].cget('style')
+        self.style = ttk.Style()
+        self.style.configure("ALERT.TButton", foreground="red", background="yellow")
+
+    def button_style_update(self, alert=False):
+        if alert:
+            self.w["button_apply"].w["APPLY"].config(style="ALERT.TButton")
+        else:
+            self.w["button_apply"].w["APPLY"].config(style=self.base_apply_button_style)
+
     def project_select_changed(self, parent, selected_class, idx):
         self.parent = parent
-        self.msg.set(f"{parent=}, {selected_class=}, {idx=}")
         self.class_idx = self.w["selector"].class2idx[selected_class] + 1
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == parent[0]]
         df = df[df["Owner"] == self.SP.user]
-        df = df[["OrderValue", "Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Status", "Memo"]]
+        df = df[["OrderValue", "Name", "Status", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Actual_Hour", "Memo"]]
         self.update_table_contents(df)
+        self.button_style_update()
 
     def update_order_numbers(self, df):
         orders = df.loc[:, "OrderValue"]
@@ -92,9 +106,8 @@ class ATT(tk.Frame):
         pass
 
     def button_apply(self):
+        self.logger.debug("ATT button_apply")
         df = self.w["table"].df
-        # print(f"{df=}")
-        # print(f"{self.SD[self.class_idx]=}")
         if self.parent[0] == "0":
             color_dic = sf.generate_color_dict()
             color = random.choice(list(color_dic.keys()))
@@ -117,8 +130,9 @@ class ATT(tk.Frame):
                 self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
                 self.SD[self.class_idx].loc[idx, "Status"] = df.loc[idx, "Status"]
                 self.SD[self.class_idx].loc[idx, "Memo"] = df.loc[idx, "Memo"]
-        # update
+        self.logger.debug(f"Updated self.SD[{self.class_idx}].loc[{idx}]")
         self.click_apply_bind()
+        self.button_style_update()
 
     def button_add(self):
         inputs = self.w["input"].get("1.0", "end")
@@ -148,9 +162,10 @@ class ATT(tk.Frame):
                 msg.append(inp + f" : {item['Error']}")
         msg.append("")
         self.update_input_area(user_txt_list=msg)
+        self.button_style_update(alert=True)
 
     def parse_string(self, s):
-        default_values = [1, "", "", "", "", ""]
+        default_values = [0.1, "", "", "", "", ""]
         s = [si.replace(" ", "") for si in s.split(",")]
         s = s + default_values[len(s)-1:]
 
@@ -205,7 +220,11 @@ class ATT(tk.Frame):
         return item
 
     def button_delete(self):
-        pass
+        indices = [idx for idx in self.w["table"].selection()]
+        df = self.w["table"].df
+        df.loc[indices, "Status"] = "Deleted"
+        self.update_table_contents(df)
+        self.button_style_update(alert=True)
 
     def button_up(self):
         self.change_order(-1.5)
@@ -219,11 +238,11 @@ class ATT(tk.Frame):
         df.loc[indices, "OrderValue"] += c
         self.update_table_contents(df)
         self.w["table"].selection_add(indices)
+        self.button_style_update(alert=True)
 
     def button_pull(self):
         df = self.SD[self.class_idx]
         df = df[df["Parent_ID"] == self.parent[0]]
-        
         user_txt_list = []
         for idx in df.index:
             items = df.loc[idx, ["Name", "Total_Estimate_Hour", "Plan_Begin_Date", "Plan_End_Date", "Status", "Memo"]].values

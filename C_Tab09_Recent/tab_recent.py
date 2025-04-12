@@ -46,7 +46,6 @@ class RecentTicket(tk.Frame):
         self.update(mode)
 
     def update(self, mode=None):
-        print("update func")
         display_date = self.w["inp_box"].get_date()
         self.w["recent"].update(display_date, mode)
 

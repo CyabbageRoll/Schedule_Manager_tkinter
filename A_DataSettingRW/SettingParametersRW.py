@@ -103,6 +103,7 @@ class JSONReadWrite:
 
     def _write_json(self, p_dir, file_name, save_item):
         file_name = os.path.join(p_dir, file_name)
+        self.logger.debug(f"write json file: {file_name}")
         with open(file_name, 'w', encoding="UTF-8") as f:
             json.dump(save_item, f, indent=4, ensure_ascii=False)
 

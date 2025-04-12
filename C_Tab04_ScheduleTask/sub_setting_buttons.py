@@ -22,7 +22,7 @@ class SettingButtons(tk.Frame):
         self.update_date_combo_func = None
 
     def set_variables(self):
-        self.class_list = ["Project1", "Project2", "Project3", "Project4", "Task"]
+        self.class_list = ["Project2", "Project3", "Project4", "Task", "Ticket"]
         self.class_dict = {k: i + 2 for i, k in enumerate(self.class_list)}
         self.calendar_list = ["Daily", "Weekly", "Monthly"]
 

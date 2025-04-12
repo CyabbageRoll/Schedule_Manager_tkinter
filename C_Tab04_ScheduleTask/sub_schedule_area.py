@@ -259,9 +259,12 @@ class ScheduleArea(tk.Frame):
         for i in range(class_idx, 6):
             df_child = self.SD[6 - i + class_idx]
             df_parent = self.SD[5 - i + class_idx]
+            df_child = df_child[df_child["Status"] == "ToDo"]
+            df_parent = df_parent[df_parent["Status"] == "ToDo"]
             # 子供の工数を足し合わせて親の工数を更新
             for idx in df_parent.index:
                 df_child_tmp = df_child[df_child["Parent_ID"] == idx]
+                # df_child_tmp = df_child_tmp[df_child["Status"] == "ToDo"]
                 estimate_hours = df_child_tmp["Total_Estimate_Hour"].sum()
                 actual_hours = df_child_tmp["Actual_Hour"].sum()
                 self.SD[5 - i + class_idx].loc[idx, "Total_Estimate_Hour"] = estimate_hours
@@ -293,7 +296,8 @@ class ScheduleArea(tk.Frame):
         for p_id, df in df_items.items():
             next_available_start_hour = 0.0
             for idx in df.index[::-1]:
-                tmp_estimate_hours[idx] = max(0.25, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
+                min_hour = 0.1 if self.class_idx == 6 else 0.0
+                tmp_estimate_hours[idx] = max(min_hour, df.loc[idx, "Total_Estimate_Hour"] - df.loc[idx, "Actual_Hour"])
                 available_start_hour_dict[idx] = next_available_start_hour
                 start_date = df.loc[idx, "Plan_Begin_Date"]
                 if start_date == start_date:
@@ -304,6 +308,8 @@ class ScheduleArea(tk.Frame):
             # 後ろから順番に開始しなければならない時間を計算する
             must_start_hour = 9999
             for idx in df.index:
+                if tmp_estimate_hours[idx] == 0.0:
+                    continue
                 remaining_hours1 = must_start_hour - tmp_estimate_hours[idx]
                 # 自分自身の納期までの残り日数
                 due_date = df.loc[idx, "Plan_End_Date"]
