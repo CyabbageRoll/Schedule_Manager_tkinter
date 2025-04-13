@@ -6,7 +6,7 @@ import tkinter as tk
 import D_SubFrames as sf
 
 
-class TeamInfo(tk.Frame):
+class Memo(tk.Frame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.logger = master.logger

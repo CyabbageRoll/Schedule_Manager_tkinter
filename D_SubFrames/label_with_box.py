@@ -131,12 +131,13 @@ class LabelEntryBox(LabelBoxBase):
                  **kwargs):
         super().__init__(master, label_txt, init_value, **kwargs)
         self.justify = justify
-        supported_type = ["str", "int", "float"]
+        supported_type = ["str", "int", "float", "list_str", "list_int"]
         assert input_type in supported_type, f"{input_type} is not supported"
         self.input_type = input_type
         self.bind_func_return_callback = None
         self.bind_func_focus_out_callback = None
         self.initialize()
+
 
     def set_widgets(self):
         super().set_widgets()
@@ -147,8 +148,8 @@ class LabelEntryBox(LabelBoxBase):
                                  font=self.font)
         
     def set_bind(self):
-        self.w["Box"].bind("<Return>", self.warning_type_miss_match)
-        self.w["Box"].bind("<FocusOut>", self.warning_type_miss_match)
+        # self.w["Box"].bind("<Return>", self.warning_type_miss_match)
+        # self.w["Box"].bind("<FocusOut>", self.warning_type_miss_match)
         self.w["Box"].bind("<Return>", self.bind_func_return)
         self.w["Box"].bind("<FocusOut>", self.bind_func_focus_out)
 
@@ -160,10 +161,12 @@ class LabelEntryBox(LabelBoxBase):
             self.w["Box"].configure(bg="red")
 
     def bind_func_return(self, event):
+        self.warning_type_miss_match(event)
         if self.bind_func_return_callback is not None:
             self.bind_func_return_callback()
 
     def bind_func_focus_out(self, event):
+        self.warning_type_miss_match(event)
         if self.bind_func_focus_out_callback is not None:
             self.bind_func_focus_out_callback()
 
@@ -174,6 +177,10 @@ class LabelEntryBox(LabelBoxBase):
             ret = self.is_type_int()
         elif self.input_type == "float":
             ret = self.is_type_float()
+        elif self.input_type == "list_str":
+            ret = self.is_type_list_str()
+        elif self.input_type == "list_int":
+            ret = self.is_type_list_int()
         return ret
 
     def is_type_str(self):
@@ -189,6 +196,20 @@ class LabelEntryBox(LabelBoxBase):
     def is_type_float(self):
         try:
             float(self.get())
+            return True
+        except:
+            return False
+
+    def is_type_list_str(self):
+        try:
+            [str(s) for s in self.get().split(",")]
+            return True
+        except:
+            return False
+        
+    def is_type_list_int(self):
+        try:
+            [int(s) for s in self.get().split(",")]
             return True
         except:
             return False
