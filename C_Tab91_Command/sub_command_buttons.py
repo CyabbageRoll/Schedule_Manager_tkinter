@@ -15,7 +15,8 @@ class UserCommandButtons(tk.Frame):
         self.SP = master.SP
         self.OB = master.OB
         self.MEMO = master.MEMO
-        self.Buttons = ["Command01", "Command02", "Command03", "Command04", "Command05"]
+        self.Buttons = self.SP.command_buttons
+        self.command_button_functions = {i + 1: None for i in range(len(self.Buttons))}
         self.set_variables()
         self.set_widgets()
         self.pack_widgets()
@@ -48,5 +49,4 @@ class UserCommandButtons(tk.Frame):
 
     def press_command(self, button_idx):
         self.logger.debug(f"press user command button {button_idx}")
-        print(f"press user command button {button_idx}")
-
+        self.command_button_functions[button_idx](self.SD, self.SP, self.OB)

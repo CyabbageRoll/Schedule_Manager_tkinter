@@ -25,15 +25,41 @@ class ConfigTable(tk.Frame):
 
     def set_variables(self):
         self.msg = tk.StringVar()
-        self.section_label = {0: "Parameter Configs",
+        self.section_label = {0: "Parameter Configs Listは空白区切りで入力する",
                               1: "GUI Configs"}
         self.type_dict = {str: "str", 
                           int: "int", 
                           float: "float", 
                           List[str]: "list_str",
                           list: "list_str",}
-        self.explanation_dict = {"members": "表示メンバー名",}
-
+        self.explanation_dict = {"user": "ユーザ名(Str)",
+                                 "server_dir": "サーバーのディレクトリ(Str)",
+                                 "members": "表示メンバー名(List)",
+                                 "daily_begin_time": "Dailyタブの初期の開始時間(Int)",
+                                 "daily_info_combo_Health": "Health入力欄の選択項目(List)",
+                                 "daily_info_combo_Work_Place": "WorkPlace入力欄の選択項目(List)",
+                                 "daily_info_combo_Safety": "Safety入力欄の選択項目(List)",
+                                 "daily_info_combo_OverWork": "OverWork入力欄の選択項目(List)",
+                                 "window_bg_color": "基準背景色(要再起動)(Str)",
+                                 "schedule_dy_factor": "スケジュールの縦の余白(Float)",
+                                 "command_buttons": "追加ボタンの名前(List)",
+                                 "window_width": "初期ウインドウの幅(Int)",
+                                 "window_height": "初期ウインドウの高さ(Int)",
+                                 "font_size": "フォントサイズ(Int)",
+                                 "schedule_title_fontsize_factor": "親スケジュール名のフォント比率(Float)"
+                                 }
+        
+        self.except_items = ["daily_task_hour", 
+                             "schedule_draw_width",
+                             "schedule_prj_type",
+                             "schedule_calendar_type",
+                             "schedule_holidays",
+                             "schedule_bg_color",
+                             "schedule_font_size",
+                             "daily_end_time",
+                             "schedule_width"
+        ]
+                           
     def set_widgets(self):
         self.w = OrderedDict()
         self.w["Label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
@@ -46,6 +72,8 @@ class ConfigTable(tk.Frame):
             self.w[f"Label{i}"] = tk.Label(self, text=self.section_label[i], font=self.font, anchor="w")
             for field in fields(params):
                 item_name = field.name
+                if item_name in self.except_items:
+                    continue
                 item_value = getattr(params, item_name)
                 item_type = self.type_dict[field.type]
                 display_name = self.explanation_dict.get(item_name, item_name)
