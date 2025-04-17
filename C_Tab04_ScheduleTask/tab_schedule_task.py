@@ -29,8 +29,8 @@ class ScheduleTask(tk.Frame):
         self.w = OrderedDict()
         self.w["holidays"] = sf.LabelEntryBox(self, "Holidays", label_width=15, init_value=self.SP.schedule_holidays)
         self.w["inp_box"] = tab4.SettingButtons(self)
-        self.w["schedule"] = tab4.ScrollableScheduleArea(self)
         self.w["label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
+        self.w["schedule"] = tab4.ScrollableScheduleArea(self)
 
     def pack_widgets(self):
         for k, widget in self.w.items():

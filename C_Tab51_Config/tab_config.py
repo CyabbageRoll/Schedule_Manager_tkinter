@@ -45,7 +45,7 @@ class ConfigTable(tk.Frame):
                                  "command_buttons": "追加ボタンの名前(List)",
                                  "window_width": "初期ウインドウの幅(Int)",
                                  "window_height": "初期ウインドウの高さ(Int)",
-                                 "font_size": "フォントサイズ(Int)",
+                                 "font_size": "スケジュール以外のフォントサイズ(要再起動)(Int)",
                                  "schedule_title_fontsize_factor": "親スケジュール名のフォント比率(Float)"
                                  }
         
@@ -103,6 +103,8 @@ class ConfigTable(tk.Frame):
         for i, params in enumerate([self.SP, self.GP]):
             param_dict = vars(params)
             for key in param_dict:
+                if key in self.except_items:
+                    continue
                 value = self.w[key].get()
                 value_type = self.type_dict[type(param_dict[key])]
                 converted_value = self.convert_type(value, value_type)

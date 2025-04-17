@@ -18,6 +18,7 @@ class ProjectManage(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.OB = master.OB
         self.add_bind_func = None
         self.set_variables()
         self.set_widgets()
@@ -97,6 +98,7 @@ class ProjectManage(tk.Frame):
                 messagebox.showinfo("Information" ,"Unable to delete because project have children")
                 return
         self.SD[class_idx].loc[current_idx, "Status"] = "Deleted"
+        self.SD[class_idx].loc[current_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.w["Selector"].clear_button_press()
         self.update_func()
 
@@ -115,7 +117,6 @@ class ProjectManage(tk.Frame):
 
     def update_schedule_data(self, ds, class_idx):
         ds["Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
-        print(ds["Last_Update"])
         self.SD[class_idx].loc[ds.name] = ds
         pid = ds["Parent_ID"]
 
@@ -125,7 +126,7 @@ class ProjectManage(tk.Frame):
         orders = orders.sort_values()
         for order, idx in enumerate(orders.index):
             self.SD[class_idx].loc[idx, "OrderValue"] = order
-
+            self.SD[class_idx].loc[idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.logger.info(f"insert schedule data {ds.name}")
 
     def get_correct_data_or_warning_msg(self):

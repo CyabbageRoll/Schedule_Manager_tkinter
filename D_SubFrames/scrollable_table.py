@@ -35,8 +35,8 @@ class ScrollableTable(tk.Frame):
             self.w["tree"].heading(c, text=c)
         
         # Scroll barの設定
-        self.w["scroll_h"] = ttk.Scrollbar(self, orient="horizontal", command=self.w["tree"].yview)
-        self.w["scroll_v"] = ttk.Scrollbar(self, orient="vertical", command=self.w["tree"].xview)
+        self.w["scroll_h"] = ttk.Scrollbar(self, orient="horizontal", command=self.w["tree"].xview)
+        self.w["scroll_v"] = ttk.Scrollbar(self, orient="vertical", command=self.w["tree"].yview)
         self.w["tree"]['xscrollcommand'] = self.w["scroll_h"].set
         self.w["tree"]['yscrollcommand'] = self.w["scroll_v"].set
 

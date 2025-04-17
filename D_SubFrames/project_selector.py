@@ -15,6 +15,7 @@ class ProjectSelector(tk.Frame):
         self.font = master.font
         self.SD = master.SD
         self.SP = master.SP
+        self.OB = master.OB
         self.ids = [None] * 6
         self.class_list=["Project1", "Project2", "Project3", "Project4", "Task", "Ticket"]
         self.class_dict = {f"P{i}": c for i, c in enumerate(self.class_list)}
@@ -112,9 +113,13 @@ class ProjectSelector(tk.Frame):
 
     def update_list_box(self):
         self.find_prj_ids_from_input()
+        selected_class = self.w1["Class_selector"].get()
         for i, idx in enumerate(["0"] + self.ids[:-1]):
             if idx:
-                name_list = self.SD[i+1][self.SD[i+1]["Parent_ID"] == idx]["Name"].tolist()
+                df = self.SD[i+1].copy()
+                if self.class_dict.get(f"P{i}", None) == selected_class:
+                    df = df[df["Owner"] == self.OB["Member"]]
+                name_list = df[df["Parent_ID"] == idx]["Name"].tolist()
                 self.w1[f"P{i}"].set_list(name_list)
 
     def find_prj_ids_from_input(self):

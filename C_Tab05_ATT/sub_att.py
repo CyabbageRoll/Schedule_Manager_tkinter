@@ -19,6 +19,7 @@ class ATT(tk.Frame):
         self.SD = master.SD
         self.SP = master.SP
         self.GP = master.GP
+        self.OB = master.OB
         self.click_apply_bind = None
         self.set_variables()
         self.set_widgets()
@@ -130,6 +131,7 @@ class ATT(tk.Frame):
                 self.SD[self.class_idx].loc[idx, "Plan_End_Date"] = df.loc[idx, "Plan_End_Date"]
                 self.SD[self.class_idx].loc[idx, "Status"] = df.loc[idx, "Status"]
                 self.SD[self.class_idx].loc[idx, "Memo"] = df.loc[idx, "Memo"]
+                self.SD[self.class_idx].loc[idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.logger.debug(f"Updated self.SD[{self.class_idx}].loc[{idx}]")
         self.click_apply_bind()
         self.button_style_update()

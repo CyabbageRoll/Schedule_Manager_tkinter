@@ -15,7 +15,7 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.VER = "v2-r20250413"
+        self.VER = "v2-r20250418"
         self.user_id = os.environ.get('USERNAME') or os.environ.get('USER')
         p_dir = os.path.dirname(__file__)
         log_file = os.path.join(p_dir, f"./log/debug_{self.user_id}.log")
@@ -28,6 +28,11 @@ class ScheduleManager(tk.Tk):
         self.set_frames()
         self.grid_frames()
         self.set_binds()
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def on_closing(self):
+        self.logger.debug("TK Application Ends")
+        self.destroy()
 
     def tk_setting(self):
         self.font = tkinter.font.Font(self, family=self.GP.font_family, size=self.GP.font_size)

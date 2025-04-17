@@ -274,7 +274,7 @@ class ScheduleArea(tk.Frame):
             relative_ids1 = set(df_child_1["Parent_ID"].values.tolist())
             relative_ids2 = set(df_child.loc[relative_ids, "Parent_ID"].values.tolist())
             relative_ids3 = set(df_parent[df_parent["Owner"] == member].index.tolist())
-            relative_ids = relative_ids1 | relative_ids2 | relative_ids3
+            relative_ids = list(relative_ids1 | relative_ids2 | relative_ids3)
         return df[df.index.isin(relative_ids)]
 
     # 並び替えて、日付をdatetime64に変換

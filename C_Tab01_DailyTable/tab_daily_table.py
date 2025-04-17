@@ -86,6 +86,7 @@ class DailyInformation(tk.Frame):
         cols = [self.column_name_list[row] for row in rows]
         current_item = self.SD["daily_sch"].loc[df_idx, cols]
         self.SD["daily_sch"].loc[df_idx, cols] = ds.name
+        self.SD["daily_sch"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
 
         update_dict = defaultdict(float)
         update_dict[ds.name] = len(rows) * 0.25
@@ -98,12 +99,14 @@ class DailyInformation(tk.Frame):
             if idx == "" or h == 0:
                 continue
             self.SD[6].loc[idx, "Actual_Hour"] += h
+            self.SD[6].loc[idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
 
     def update_local_df(self):
         df_idx = self.generate_df_idx()
         if df_idx not in self.SD["daily_sch"].index:
             self.SD["daily_sch"].loc[df_idx, :] = ""
             self.SD["daily_sch"].loc[df_idx, "Owner"] = self.SP.user
+            self.SD["daily_sch"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
 
         ds = self.SD["daily_sch"].loc[df_idx, :]
         items = [["", "", "", ""] for _ in range(24*4)]

@@ -79,7 +79,7 @@ class TeamInfo(tk.Frame):
         if df_idx not in self.SD["daily_info"].index:
             return ""
         overwork = self.SD["daily_info"].loc[df_idx, "OverWork"]
-        if overwork != overwork:
+        if overwork != overwork or overwork == "None":
             return ""
         return f": {overwork}"
 
