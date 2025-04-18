@@ -122,8 +122,9 @@ class RegularlyArea(tk.Frame):
     # 順番にスケジュールを表示させる
     def draw_project_schedules(self, all_schedule_items):
         y0 = self.y00 * 1
-        for p_id, schedule_items in all_schedule_items.items():
-            y0 = self.draw_single_project_schedule(p_id, y0, schedule_items)
+        sorted_idx = self.sort_task_ids(all_schedule_items.keys())
+        for p_id in sorted_idx:
+            y0 = self.draw_single_project_schedule(p_id, y0, all_schedule_items[p_id])
 
     # 1つの束のスケジュールを表示させる
     def draw_single_project_schedule(self, p_id, y0, schedule_items):
@@ -173,10 +174,20 @@ class RegularlyArea(tk.Frame):
         if len(names) == 0:
             names = ["-"]
         name, p_names = names[0], names[1:]
-        s = name + f" : "
+        s = ""
         if p_names:
-            s += " (" + " - ".join(p_names) + ") "
+            s += " - ".join(p_names[::-1])
+        s += f" - " + name
         return s
+
+    def get_parent_indices_and_name(self, class_idx, idx):
+        p2c_dic_single = {}
+        for i in range(class_idx):
+            df = self.SD[self.class_idx - 1 - i]
+            name, pid = df.loc[idx, ["Name", "Parent_ID"]]
+            p2c_dic_single[pid] = (idx, name)
+            idx = pid
+        return p2c_dic_single
     
     def get_draw_items(self):
         p_ids = set(self.SD[self.class_idx-1].index.tolist())
@@ -196,4 +207,19 @@ class RegularlyArea(tk.Frame):
                 all_schedule_items[p_id].append((self.x00, x1, idx))
         return all_schedule_items
     
-
+    def sort_task_ids(self, task_ids):
+        p2c_dic = defaultdict(list)
+        for task_id in task_ids:
+            p2c_dic_single = self.get_parent_indices_and_name(class_idx=self.class_idx-1, idx=task_id)
+            for pid, (idx, name) in p2c_dic_single.items():
+                p2c_dic[pid].append((name, idx))
+        
+        sorted_idx = []
+        search_list = sorted(list(set(p2c_dic["0"])))
+        while search_list:
+            name, idx = search_list.pop()
+            if idx in task_ids:
+                sorted_idx.append((idx))
+            else:
+                search_list.extend(sorted(list(set(p2c_dic.get(idx, [])))))
+        return sorted_idx

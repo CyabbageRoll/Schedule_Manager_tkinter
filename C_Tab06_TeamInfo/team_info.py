@@ -58,7 +58,7 @@ class TeamInfo(tk.Frame):
         txt = "working hours\n"
         txt = "Name : Begin ~ End [Working hours] (Breaks) : \n"
         for user_name in self.members:
-            txt += f"\n{user_name:10s} : {self.fetch_working_hours(user_name)} : {self.fetch_info_overwork(user_name)}"
+            txt += f"\n{user_name:12s} : {self.fetch_working_hours(user_name)} {self.fetch_work_place(user_name)} : {self.fetch_info_overwork(user_name)}"
         self.set_new_text(1, txt)
 
     def fetch_working_hours(self, user_name):
@@ -83,25 +83,40 @@ class TeamInfo(tk.Frame):
             return ""
         return f": {overwork}"
 
-    def set_info2(self):
-        txt = "information\n"
-        for user_name in self.members:
-            txt += f"\n{user_name:10s}: \n{self.fetch_info(user_name)}"
-        self.set_new_text(2, txt)
-
-    def fetch_info(self, user_name):
+    def fetch_work_place(self, user_name):
         df_idx = str(self.OB["Date"]) + "-" + user_name
         if df_idx not in self.SD["daily_info"].index:
-            return ""
+            return "< >"
+        work_place = self.SD["daily_info"].loc[df_idx, "Work_Place"]
+        if work_place != work_place or work_place == "None":
+            return "< >"
+        return f"<{work_place}>"
+
+    def set_info2(self):
+        txt = "information:\n"
+        info2_dicts = {user_name: self.fetch_info2(user_name)for user_name in self.members}
+        info2_keys = self.fetch_info2_keys()
+        for info2_key in info2_keys:
+            txt += f"{info2_key}:\n"
+            for member_name, info2_dic in info2_dicts.items():
+                txt += f"\t{member_name:15s}: {info2_dic.get(info2_key, '')}\n"
+            txt += "\n"
+        self.set_new_text(2, txt)
+
+    def fetch_info2_keys(self):
+        return ["Health", "Safety", "Info1", "Info2", "Info3"]
+
+    def fetch_info2(self, user_name):
+        df_idx = str(self.OB["Date"]) + "-" + user_name
+        if df_idx not in self.SD["daily_info"].index:
+            return {}
         ds_info = self.SD["daily_info"].loc[df_idx, :]
         info_dic = {}
-        for idx in ds_info.index[1:]:
+        info2_keys = self.fetch_info2_keys()
+        for idx in info2_keys:
             if ds_info[idx] and ds_info[idx] == ds_info[idx]:
                 info_dic[idx] = ds_info[idx]
-        txt = ""
-        for k, v in info_dic.items():
-            txt += f"\t{k}: {v}\n"
-        return txt
+        return info_dic
 
     def set_info3(self):
         txt = "info3"
