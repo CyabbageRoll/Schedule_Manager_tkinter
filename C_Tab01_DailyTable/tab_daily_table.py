@@ -105,7 +105,7 @@ class DailyInformation(tk.Frame):
         df_idx = self.generate_df_idx()
         if df_idx not in self.SD["daily_sch"].index:
             self.SD["daily_sch"].loc[df_idx, :] = ""
-            self.SD["daily_sch"].loc[df_idx, "Owner"] = self.SP.user
+            self.SD["daily_sch"].loc[df_idx, "Owner"] = self.OB["Member"]
             self.SD["daily_sch"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
 
         ds = self.SD["daily_sch"].loc[df_idx, :]
@@ -185,7 +185,7 @@ class DailyInformation(tk.Frame):
         txt = self.w["Info_area"].w[k].get()
         df_idx = self.generate_df_idx()
         self.SD["daily_info"].loc[df_idx, k] = txt
-        self.SD["daily_info"].loc[df_idx, "Owner"] = self.SP.user
+        self.SD["daily_info"].loc[df_idx, "Owner"] = self.OB["Member"]
         self.SD["daily_info"].loc[df_idx, "Last_Update"] = datetime.datetime.today().strftime("%Y-%m-%d")
         self.daily_info_update_bind()
 

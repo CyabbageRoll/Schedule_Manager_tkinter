@@ -177,7 +177,8 @@ class RegularlyArea(tk.Frame):
         s = ""
         if p_names:
             s += " - ".join(p_names[::-1])
-        s += f" - " + name
+            s += f" - "
+        s += name
         return s
 
     def get_parent_indices_and_name(self, class_idx, idx):

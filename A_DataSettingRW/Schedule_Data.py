@@ -89,7 +89,7 @@ def upsert_sql_with_df(logger, df, db_path, table_name, user_name):
         last_update = pd.to_datetime(last_update, errors='coerce').date()
         c_date = (pd_today() - pd.DateOffset(days=2)).date()
         if last_update and last_update > c_date:
-                update_ids.append(idx)
+            update_ids.append(idx)
     df = df[df.index.isin(update_ids)]
 
     try:

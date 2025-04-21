@@ -15,11 +15,12 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.VER = "v2-r20250418"
+        self.VER = "v2-r20250422"
         self.user_id = os.environ.get('USERNAME') or os.environ.get('USER')
         p_dir = os.path.dirname(__file__)
         log_file = os.path.join(p_dir, f"./log/debug_{self.user_id}.log")
         self.logger = ut.logger_settings(log_file=log_file, add_info=self.VER)
+        self.report_callback_exception = self.log_exception
         self.json_rw = DS.JSONReadWrite(p_dir, self.user_id, self.logger)
         self.SP, self.GP, self.MEMO = self.json_rw.read()
         self.SD = DS.read_schedule_data(self.logger, self.SP.server_dir)
@@ -29,6 +30,10 @@ class ScheduleManager(tk.Tk):
         self.grid_frames()
         self.set_binds()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def log_exception(self, exc, val, tb):
+        self.logger.error("An unexpected error occurred", exe_info=(exc, val, tb))
+        tk.messagebox.showerror("予期しないエラーが発生しています。\n管理者にご連絡ください。")
 
     def on_closing(self):
         self.logger.debug("TK Application Ends")
