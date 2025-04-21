@@ -1,5 +1,7 @@
 import os
+import shutil
 import logging
+import datetime
 from logging.handlers import RotatingFileHandler
 
 def logger_settings(log_file="./log/debug.log", add_info=""):
@@ -24,6 +26,20 @@ def logger_settings(log_file="./log/debug.log", add_info=""):
     logger.debug("\n\n\n\nApplication Starts")
 
     return logger
+
+
+def copy_log_file(log_file, destination_dir):
+    if not os.path.exists(log_file):
+        return
+    if not os.path.exists(destination_dir):
+        os.makedirs(destination_dir, exist_ok=True)
+
+    src = log_file
+    dst = os.path.join(destination_dir, os.path.basename(src))
+    day_str = datetime.datetime.now().strftime("%y%m%d%H%m")
+    dst = dst.replace(".log", f"{day_str}.log")
+    shutil.copyfile(src, dst)
+    return
 
 
 if __name__ == "__main__":

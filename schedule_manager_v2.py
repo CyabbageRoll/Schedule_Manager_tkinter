@@ -18,8 +18,9 @@ class ScheduleManager(tk.Tk):
         self.VER = "v2-r20250422"
         self.user_id = os.environ.get('USERNAME') or os.environ.get('USER')
         p_dir = os.path.dirname(__file__)
-        log_file = os.path.join(p_dir, f"./log/debug_{self.user_id}.log")
-        self.logger = ut.logger_settings(log_file=log_file, add_info=self.VER)
+        self.log_file = os.path.join(p_dir, f"./log/debug_{self.user_id}.log")
+        self.logger = ut.logger_settings(log_file=self.log_file, add_info=self.VER)
+        self.log_min = datetime.datetime.now() - datetime.timedelta(minutes=10)
         self.report_callback_exception = self.log_exception
         self.json_rw = DS.JSONReadWrite(p_dir, self.user_id, self.logger)
         self.SP, self.GP, self.MEMO = self.json_rw.read()
@@ -32,8 +33,12 @@ class ScheduleManager(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def log_exception(self, exc, val, tb):
-        self.logger.error("An unexpected error occurred", exe_info=(exc, val, tb))
-        tk.messagebox.showerror("予期しないエラーが発生しています。\n管理者にご連絡ください。")
+        self.logger.error("An unexpected error occurred", exc_info=(exc, val, tb))
+        if self.log_min + datetime.timedelta(minutes=5) < datetime.datetime.now():
+            self.log_min = datetime.datetime.now()
+            destination_dir = os.path.join(self.SP.server_dir, "log", self.user_id)
+            ut.copy_log_file(self.log_file, destination_dir)
+            tk.messagebox.showerror("Error", "予期しないエラーが発生しています。\n管理者にご連絡ください。")
 
     def on_closing(self):
         self.logger.debug("TK Application Ends")
@@ -90,6 +95,11 @@ class ScheduleManager(tk.Tk):
         self.mw.w["Projects-Display"].edit_att_menu_click = self.edit_att
         self.ob.get_memo_dict = self.mw.w["Memo"].get_to_memo_dict
         self.ob.refresh_bind_func = self.refresh
+
+    #     self.sw.w["Commands"].command_button_functions["B01"] = self.test_fff
+
+    # def test_fff(self, sd, sp, ob):
+    #     a = 1/0
 
     def edit_ticket(self, class_idx, idx):
         self.sw.w["Project-Manage"].set(class_idx, idx)
