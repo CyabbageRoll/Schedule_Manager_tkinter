@@ -28,7 +28,13 @@ class ProjectDisplay(tk.Frame):
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Refresh_button"] =  ttk.Button(self, text="Refresh", command=self.refresh_button_press, style="My.TButton")
+        # self.w["Refresh_button"] =  ttk.Button(self, text="Refresh", command=self.refresh_button_press, style="My.TButton")
+        self.w["Buttons"] = sf.ButtonRow(self, buttons=[["Refresh", self.refresh_button_press],
+                                                        ["Ex-Project2", lambda x=1: self.expand(x)],
+                                                        ["Ex-Project3", lambda x=2: self.expand(x)],
+                                                        ["Ex-Project4", lambda x=3: self.expand(x)],
+                                                        ["Ex-Task", lambda x=4: self.expand(x)],
+                                                        ["Ex-Ticket", lambda x=5: self.expand(x)]])
         H = ["Owner", "Status", "Plan_Begin_Date", "Plan_End_Date", "Total_Estimate_Hour", "Actual_Hour"]
         I = {"1": [1]*len(H)}
         df = pd.DataFrame.from_dict(I, columns=H, orient="index")
@@ -38,7 +44,7 @@ class ProjectDisplay(tk.Frame):
         for k, widget in self.w.items():
             f = tk.BOTH
             e = True
-            if k == "Refresh_button":
+            if k == "Buttons":
                 e = False
             widget.pack(side=tk.TOP, fill=f, expand=e)
 
@@ -75,6 +81,12 @@ class ProjectDisplay(tk.Frame):
         popup_menu.add_command(label="編集", command=lambda : self.edit_ticket_menu_click(class_idx, idx))
         popup_menu.add_command(label="ATT", command=lambda : self.edit_att_menu_click(class_idx, idx))
         popup_menu.post(event.x_root, event.y_root)
+
+    def expand(self, p):
+        self.w["Table"].expand_prj = 6
+        self.w["Table"].expand_all(open=False)
+        self.w["Table"].expand_prj = p
+        self.w["Table"].expand_all(open=True)
 
 
 class ScrollableTableTree(sf.ScrollableTable):
@@ -117,3 +129,16 @@ class ScrollableTableTree(sf.ScrollableTable):
         for item in self.expanded_items:
             if self.w["tree"].exists(item):
                 self.w["tree"].item(item, open=True)
+
+    def expand_children(self, parent, cid, open=True):
+        children = self.w["tree"].get_children(parent)
+        for child in children:
+            if cid < self.expand_prj:
+                self.w["tree"].item(child, open=open)
+                self.expand_children(child, cid+1, open=open)
+
+    def expand_all(self, open=True):
+        root_items = self.w["tree"].get_children()
+        for item in root_items:
+            self.w["tree"].item(item, open=open)
+            self.expand_children(parent=item, cid=1, open=open)
