@@ -132,6 +132,9 @@ class DateInputBox(tk.Frame):
 
     def get(self):
         return self.selected_date
+    
+    def get_str_date(self):
+        return self.date2str(self.selected_date)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,7 @@ class ScheduleArea(tk.Frame):
         self.pack_widgets()
         self.set_init()
 
+    ## 基本設定 ==============================================================
     def set_variables(self):
         self.value = tk.StringVar()
 
@@ -51,7 +52,8 @@ class ScheduleArea(tk.Frame):
 
     def set_init(self):
         self.update(mode="both")
-        
+    
+    ## 更新 ==============================================================
     def refresh_canvas_and_parameters(self):
         self.dy = self.GP.schedule_font_size * self.GP.schedule_dy_factor
         self.w["canvas"].delete("all")
@@ -63,15 +65,34 @@ class ScheduleArea(tk.Frame):
         Args:
             mode (str, optional): calendar, width: カレンダの表示や幅を変える. prj: 描画するプロジェクトを更新. both: 両方. Defaults to None.
         """
+        # 初期化
         self.unbind()
         self.refresh_canvas_and_parameters()
+
+        # カレンダー準備
         if mode in ["both", "calendar", "width", "day_hour"]:
-            self.create_calendar_items()
-        if mode in ["both", "prj"]:
-            df_items = self.get_draw_items()
-            self.sort_idx_hour_list = self.calc_start_limit(df_items)
-        all_schedule_items = self.calculate_x_and_date_flag()
-        self.draw_project_schedules(all_schedule_items)
+            self.create_calendar_items(start_day=datetime.datetime.today())
+
+        if self.SP.schedule_display_type == "Gantt":
+            if mode in ["both", "prj"]:
+                df_items = self.get_draw_items()
+                self.sort_idx_hour_list = self.calc_start_limit(df_items)
+            all_schedule_items = self.calculate_x_and_date_flag()
+            self.draw_project_schedules(all_schedule_items)
+ 
+        elif self.SP.schedule_display_type == "Schedule":
+            # 計算量低減のためにmode分岐をしていたが、メモリ効率とバグ発生防止のためとりあえずこっちはやめる
+            start_day = datetime.datetime.strptime(self.SP.schedule_start_date, "%Y-%m-%d")
+            if self.SP.schedule_calendar_type == "Weekly":
+                start_day = start_day - datetime.timedelta(days=start_day.weekday())
+            if self.SP.schedule_calendar_type == "Monthly":
+                start_day = start_day - datetime.timedelta(days=start_day.day - 1)
+
+            self.create_calendar_items(start_day=start_day, holiday=False)
+            df_items = self.get_draw_items_for_sch()
+            all_schedule_items = self.calculate_x_and_date_flag_for_sch(df_items, start_day)
+            self.draw_project_schedules(all_schedule_items)
+
         self.set_bind()
 
     def set_bind(self):
@@ -85,6 +106,7 @@ class ScheduleArea(tk.Frame):
             self.w["canvas"].tag_unbind(item_idx, "<Leave>")
         self.on_canvas_items = {}
 
+    ## マウス設定 ==============================================================
     def on_hover(self, event):
         item = self.w["canvas"].find_withtag("current")
         if item:
@@ -124,6 +146,7 @@ class ScheduleArea(tk.Frame):
     def get(self):
         pass
 
+    ## ガントチャート表示 ==============================================================
     # 順番にスケジュールを表示させる
     def draw_project_schedules(self, all_schedule_items):
         y0 = self.y00 * 1
@@ -137,15 +160,16 @@ class ScheduleArea(tk.Frame):
         ds_p = df_p.loc[p_id]
         names = self.get_parent_name(self.class_idx-1, p_id)
         ye = self.dy * (len(schedule_items) + 2)
-        self.w["canvas"].create_line(self.x00, y0+self.dy/2, self.x00 + 100000, y0+self.dy/2,
+        self.w["canvas"].create_line(self.x00+self.line_left_space, y0+self.dy/2, self.x00 + 100000, y0+self.dy/2,
                                      fill="#99AABB")
-        self.w["canvas"].create_line(self.x00+self.line_left_space/2-1, y0-self.dy/2, self.x00+self.line_left_space/2-1, y0+ye,
-                                     fill=self.color_dict[ds_p["Color"]],
-                                     width=self.line_left_space-1)
-        item_idx = self.w["canvas"].create_text(self.x00+self.line_left_space+2, y0, 
+        # self.w["canvas"].create_line(self.x00+self.line_left_space/2-1, y0-self.dy/2, self.x00+self.line_left_space/2-1, y0+ye,
+        #                              fill=self.color_dict[ds_p["Color"]],
+        #                              width=self.line_left_space-1)
+        item_idx = self.w["canvas"].create_text(self.x00,#+self.line_left_space+2, 
+                                                y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
+                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor), "bold"))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # カレンダー表示
@@ -166,7 +190,7 @@ class ScheduleArea(tk.Frame):
         y0 += self.dy * 0.2
 
         # アイテム表示
-        df = self.SD[self.class_idx]
+        df = self.SD[self.class_idx].copy()
         df = df[df["Parent_ID"] == p_id]
         for x0, x1, idx, available_flag, due_date_flag in schedule_items:
             ds = df.loc[idx]
@@ -198,6 +222,21 @@ class ScheduleArea(tk.Frame):
             self.on_canvas_items[item_idx] = (self.class_idx, idx)
         return y0 + self.dy * 2
     
+    # def get_parent_name(self, class_idx, idx):
+    #     names = []
+    #     for i in range(class_idx):
+    #         df = self.SD[self.class_idx - 1 - i]
+    #         name, idx = df.loc[idx, ["Name", "Parent_ID"]]
+    #         names.append(name)
+    #     names = [n for n in names if n != "-"]
+    #     if len(names) == 0:
+    #         names = ["-"]
+    #     name, p_names = names[0], names[1:]
+    #     s = name + f" : "
+    #     if p_names:
+    #         s += " (" + " - ".join(p_names) + ") "
+    #     return s
+    
     def get_parent_name(self, class_idx, idx):
         names = []
         for i in range(class_idx):
@@ -208,12 +247,14 @@ class ScheduleArea(tk.Frame):
         if len(names) == 0:
             names = ["-"]
         name, p_names = names[0], names[1:]
-        s = name + f" : "
+        s = ""
         if p_names:
-            s += " (" + " - ".join(p_names) + ") "
+            s += " - ".join(p_names[::-1])
+            s += f" - "
+        s += name
         return s
     
-    def create_calendar_items(self):
+    def create_calendar_items(self, start_day, holiday=True):
         w = self.SP.schedule_width * self.width_scale
         self.calendar_items = []
         x0 = 0
@@ -226,15 +267,17 @@ class ScheduleArea(tk.Frame):
                            "Monthly": self.max_columns // 20
                            }
         time_delta = time_delta_dict[self.SP.schedule_calendar_type]
-        dd = datetime.date.today() - time_delta
+        dd = start_day - time_delta
 
         for _ in range(column_num_dict[self.SP.schedule_calendar_type]):
             dd += time_delta
             str_date = dd.strftime("%Y/%m/%d")
             str_weekday = dd.strftime("%a").upper()
             if self.SP.schedule_calendar_type == "Daily":
-                if str_date in self.SP.schedule_holidays or str_weekday in self.SP.schedule_holidays:
-                    continue
+                # 休みを考慮する場合、休みの日付はスキップ
+                if holiday:
+                    if str_date in self.SP.schedule_holidays or str_weekday in self.SP.schedule_holidays:
+                        continue
             x1 = x0 + w
             str_dd = f"{dd.strftime('%m/%d')}"
             if self.SP.schedule_calendar_type == "Daily":
@@ -321,8 +364,11 @@ class ScheduleArea(tk.Frame):
                 idx_hour_list.append((must_start_hour, available_start_hour_dict[idx], idx, p_id, tmp_estimate_hours[idx]))
         return sorted(idx_hour_list, reverse=True)
 
-
     def calculate_x_and_date_flag(self):
+        """
+        各アイテムについて、
+        配置するx座標、番号idx, 開始可能flag, 納期フラグを求める
+        """
         all_schedule_items = defaultdict(list)
         x0, x1 = self.x00, self.x00
         column_days = {"Daily": 1, "Weekly": 5, "Monthly": 20}
@@ -352,7 +398,6 @@ class ScheduleArea(tk.Frame):
             # print(f"current_hour: {current_hour:0.1f}, MH: {must_start_hour}, AH:{available_start_hour}, {self.SD[6].loc[idx, 'Name']}")
         return all_schedule_items
 
-
     def which_turn(self, pop_list, current_hour):
         # どちらのリストから抽出するかを決める
         if pop_list["waiting"] and pop_list["waiting"][-1][1] < current_hour:
@@ -364,4 +409,105 @@ class ScheduleArea(tk.Frame):
         return turn_name
 
 
+    ## 計画表示 ==============================================================
+    def get_draw_items_for_sch(self, select_case=0):
+        """
+        表示するアイテムを抜き出す。
+        case1: そのアイテムのownerがmemberのものだけ
+        case2: 親の所有者がmemberもしくは、親にmember所有の子がいるものだけ
+        """
+        df_c = self.SD[self.class_idx].copy()
+        df_p = self.SD[self.class_idx-1].copy()
+        # 所有者がmemberであるparent_idx
+        owner_parent_ids = df_p[df_p["Owner"] == self.OB["Member"]].index.tolist()
+        # 所有者がmemberであるアイテムを持っている親
+        owner_child_ids = df_c[df_c["Owner"] == self.OB["Member"]].index.tolist()
+        has_parent_ids = df_c.loc[owner_child_ids, "Parent_ID"].tolist()
+        p_ids = list(set(has_parent_ids + owner_parent_ids))
+        # 非表示リストに入っているものは取り除いた親リスト
+        p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
 
+        # 子供から表示するものだけを取り出す
+        df_c = df_c[df_c["Status"].isin(["ToDo", "Done"])]
+        if select_case == 0:
+            df_c = df_c[df_c["Owner"] == self.OB["Member"]]
+        df_items = {p_id: df_c[df_c["Parent_ID"] == p_id] for p_id in p_ids}
+        return df_items
+
+    def calculate_x_and_date_flag_for_sch(self, df_items, start_day):
+        sorted_p_ids = self.sort_task_ids(list(df_items.keys()))
+        all_schedule_items = defaultdict(list)
+        for p_id in sorted_p_ids:
+            df = df_items[p_id]
+            df = df.sort_values("OrderValue")
+            for idx in df.index:
+                begin_date = self.convert_date_type(df.loc[idx, "Plan_Begin_Date"], no_date_day=start_day - datetime.timedelta(days=1))
+                end_date = self.convert_date_type(df.loc[idx, "Plan_End_Date"],
+                                                  no_date_day=start_day + datetime.timedelta(days=365))
+                w = self.SP.schedule_width * self.width_scale
+                end_date = end_date + datetime.timedelta(days=1)
+                if self.SP.schedule_calendar_type == "Daily":
+                    x0 = (begin_date - start_day).days * w + self.x00
+                    x1 = (end_date - start_day).days * w + self.x00
+                if self.SP.schedule_calendar_type == "Weekly":
+                    x0 = self.calc_weekly_x(start_day, begin_date, w)
+                    x1 = self.calc_weekly_x(start_day, end_date, w)
+                if self.SP.schedule_calendar_type == "Monthly":
+                    x0 = self.calc_monthly_x(start_day, begin_date, w)
+                    x1 = self.calc_monthly_x(start_day, end_date, w)
+
+                available_flag = False
+                due_date_flag = False
+                all_schedule_items[p_id].append((x0, x1, idx, available_flag, due_date_flag))
+
+        print(all_schedule_items)
+        # defaultdict(<class 'list'>, {'250309_0151': [(0, -1800, '250316_5c49', False, False)], '250402_21ff4568': [(0, -1800, '250316_5c49', False, False)], '250316_cb6f': [(0, -1800, '250316_5c49', False, False)], '250316_99af': [(0, -800, '250406_081c610b', False, False)], '250316_dbfc': [(0, -800, '250406_081c610b', False, False)]})
+        return all_schedule_items
+
+    def convert_date_type(self, date, no_date_day=0):
+        if not date:
+            d = no_date_day
+        if isinstance(date, str):
+            d = datetime.datetime.strptime(date, "%Y-%m-%d")
+        if isinstance(date, datetime.date):
+            t = datetime.time(0, 0, 0)  # 時間は午前0時
+            d = datetime.datetime.combine(date, t)
+        return d
+
+    def calc_weekly_x(self, start_day, calc_day, w):
+        dd = (calc_day - start_day).days
+        x7 = dd // 7
+        x5 = min((dd % 7) / 5, 1)
+        print(start_day, calc_day, dd, x7, x5)
+        return max((x7 + x5) * w, 0) + self.x00
+
+    def calc_monthly_x(self, start_day, calc_day, w):
+        dm = (calc_day.year - start_day.year) * 12 + calc_day.month - start_day.month
+        dd = (calc_day.day - 1) / 30
+        return max((dm + dd) * w, 0) + self.x00
+
+    def get_parent_indices_and_name(self, class_idx, idx):
+        p2c_dic_single = {}
+        for i in range(class_idx):
+            df = self.SD[self.class_idx - 1 - i]
+            name, pid = df.loc[idx, ["Name", "Parent_ID"]]
+            p2c_dic_single[pid] = (idx, name)
+            idx = pid
+        return p2c_dic_single
+    
+    def sort_task_ids(self, task_ids):
+        p2c_dic = defaultdict(list)
+        for task_id in task_ids:
+            p2c_dic_single = self.get_parent_indices_and_name(class_idx=self.class_idx-1, idx=task_id)
+            for pid, (idx, name) in p2c_dic_single.items():
+                p2c_dic[pid].append((name, idx))
+        
+        sorted_idx = []
+        search_list = sorted(list(set(p2c_dic["0"])))
+        while search_list:
+            name, idx = search_list.pop()
+            if idx in task_ids:
+                sorted_idx.append((idx))
+            else:
+                search_list.extend(sorted(list(set(p2c_dic.get(idx, [])))))
+        return sorted_idx

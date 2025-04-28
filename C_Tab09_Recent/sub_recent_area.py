@@ -139,7 +139,7 @@ class RecentArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
+                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor), "bold"))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # アイテム表示
@@ -180,9 +180,11 @@ class RecentArea(tk.Frame):
         if len(names) == 0:
             names = ["-"]
         name, p_names = names[0], names[1:]
-        s = name + f" : "
+        s = ""
         if p_names:
-            s += " (" + " - ".join(p_names) + ") "
+            s += " - ".join(p_names[::-1])
+            s += f" - "
+        s += name
         return s
     
     def get_draw_items(self, display_date):

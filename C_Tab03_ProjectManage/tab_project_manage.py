@@ -151,7 +151,12 @@ class ProjectManage(tk.Frame):
 
     def is_name_unique(self, ds, class_idx, current_idx):
         df = self.SD[class_idx]
-        names = df[df["Parent_ID"] == ds["Parent_ID"]]["Name"].tolist()
+        if class_idx == 6:
+            # Ticketの場合はownerが違えばチケット名の重複を許す
+            df = df[df["Owner"] == ds["Owner"]]
+            names = df[df["Parent_ID"] == ds["Parent_ID"]]["Name"].tolist()
+        else:
+            names = df[df["Parent_ID"] == ds["Parent_ID"]]["Name"].tolist()
         # 更新で名前が変わっていない
         if current_idx:
             if ds["Name"] == df.loc[current_idx, "Name"]:

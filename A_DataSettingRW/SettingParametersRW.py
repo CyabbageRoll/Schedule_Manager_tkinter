@@ -22,6 +22,8 @@ class SettingParametersServer:
     schedule_draw_width: int = 10
     schedule_prj_type: str = 6
     schedule_calendar_type: str = "Daily"
+    schedule_display_type: str = "Gantt"
+    schedule_start_date: str = "2025-04-01"
     schedule_holidays: List[str] = field(default_factory=lambda: ["SUN", "SAT"])
     daily_info_combo_Health: List[str] = field(default_factory=lambda: ["Good", "Bad"])
     daily_info_combo_Work_Place: List[str] = field(default_factory=lambda: ["Office", "Home"])

@@ -138,7 +138,7 @@ class RegularlyArea(tk.Frame):
         item_idx = self.w["canvas"].create_text(self.x00+5, y0, 
                                                 text=names,
                                                 anchor = "w",
-                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor)))
+                                                font=(self.GP.font_family, int(self.GP.schedule_font_size * self.GP.schedule_title_fontsize_factor), "bold"))
         self.on_canvas_items[item_idx] = (self.class_idx - 1, p_id)
 
         # アイテム表示

@@ -97,6 +97,9 @@ class LabelDateInputBox(LabelBoxBase):
 
     def get(self):
         return self.w["Box"].get()
+    
+    def get_str_date(self):
+        return self.w["Box"].date2str(self.get())
 
 
 class LabelColorSelector(LabelBoxBase):

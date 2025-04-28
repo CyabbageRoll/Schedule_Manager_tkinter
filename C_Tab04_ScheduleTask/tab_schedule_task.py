@@ -24,11 +24,13 @@ class ScheduleTask(tk.Frame):
 
     def set_variables(self):
         self.msg = tk.StringVar()
+        self.display_type_list = ["Gantt", "Schedule"]
 
     def set_widgets(self):
         self.w = OrderedDict()
         self.w["holidays"] = sf.LabelEntryBox(self, "Holidays", label_width=15, init_value=self.SP.schedule_holidays)
         self.w["inp_box"] = tab4.SettingButtons(self)
+        self.w["inp_box2"] = tab4.SettingButtons2(self, self.display_type_list)
         self.w["label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
         self.w["schedule"] = tab4.ScrollableScheduleArea(self)
 
@@ -51,6 +53,8 @@ class ScheduleTask(tk.Frame):
         self.w["schedule"].w["area"].label_update_func = self.set_label
         self.w["holidays"].bind_func_return_callback = lambda: self.update_func("calendar")
         self.w["holidays"].bind_func_focus_out_callback = lambda: self.update_func("calendar")
+        self.w["inp_box2"].call_back_func_radio = self.display_type_radio_update
+        self.w["inp_box2"].call_back_func_date = self.display_type_date_update
 
     def update_func(self, mode=None):
         self.GP.schedule_font_size = int(self.w["inp_box"].get_font_size())
@@ -93,3 +97,12 @@ class ScheduleTask(tk.Frame):
         except Exception as e:
             self.logger.error(f"Error: {e}")
             holidays = []
+
+    def display_type_radio_update(self, ret):
+        self.SP.schedule_display_type = ret
+        self.update_func(mode="both")
+
+    def display_type_date_update(self, ret):
+        str_date = self.w["inp_box2"].w["start_date"].get_str_date()
+        self.SP.schedule_start_date = str_date.replace("/", "-")
+        self.update_func(mode="both")

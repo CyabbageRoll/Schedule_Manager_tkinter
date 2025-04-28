@@ -25,18 +25,18 @@ class RecentSettingButtons(tk.Frame):
 
     def set_variables(self):
         self.buttons1 = [["Display", self.update_recent_area],]
-        self.buttons2 = [["1day", lambda x=-1:self.set_from_day(x)],
-                         ["3days", lambda x=-3:self.set_from_day(x)],
-                         ["5days", lambda x=-5:self.set_from_day(x)],
-                         ["Week", lambda x=-7:self.set_from_day(x)],
+        self.buttons2 = [["1day", lambda x=-0:self.set_from_day(x)],
+                         ["3days", lambda x=-2:self.set_from_day(x)],
+                         ["5days", lambda x=-4:self.set_from_day(x)],
+                         ["Week", lambda x=-6:self.set_from_day(x)],
                          ["Month", lambda x=-30:self.set_from_day(x)]]
 
     def set_widgets(self):
         self.w = OrderedDict()
-        self.w["Display"] = sf.ButtonRow(self, self.buttons1)
         self.w["From_date"] = sf.DateInputBox(self)
         self.w["Label"] = tk.Label(self, text="~", font=self.font)
         self.w["End_date"] = sf.DateInputBox(self)
+        self.w["Display"] = sf.ButtonRow(self, self.buttons1)
         self.w["Buttons"] = sf.ButtonRow(self, self.buttons2)
 
     def pack_widgets(self):
@@ -51,6 +51,7 @@ class RecentSettingButtons(tk.Frame):
     def set_from_day(self, days):
         if isinstance(days, int):
             self.w["From_date"].set(datetime.date.today() + datetime.timedelta(days=days))
+        self.update_recent_area()
 
     def update_recent_area(self):
         if self.update_recent_area_bind is not None:
