@@ -15,6 +15,7 @@ class OptionBar(tk.Frame):
         self.SD = master.SD
         self.OB = master.OB
         self.MEMO = master.MEMO
+        self.INFO = master.INFO
         self.json_rw = master.json_rw
         self.refresh_bind_func = None
         self.get_memo_dict = None
@@ -46,7 +47,7 @@ class OptionBar(tk.Frame):
         DS.save_schedule_data(self.logger, self.SD, self.SP.server_dir, self.SP.user)
         self.logger.debug("save schedule data")
         self.get_memo_dict()
-        self.json_rw.write(self.SP.server_dir, SP=self.SP, GP=self.GP, MEMO=self.MEMO)
+        self.json_rw.write(self.SP.server_dir, SP=self.SP, GP=self.GP, MEMO=self.MEMO, BUG_REP=self.INFO["Report"])
         self.logger.debug("write json data")
         self.load_button(with_message=False)
         self._show_timed_popup("保存しました")
@@ -56,8 +57,8 @@ class OptionBar(tk.Frame):
         for key, df in SD.items():
             self.SD[key] = df
         self.logger.debug("read schedule data")
-        SP, GP, MEMO = self.json_rw.read()
-        self.parameter_update(SP, GP, MEMO)
+        SP, GP, MEMO, INFO = self.json_rw.read()
+        self.parameter_update(SP, GP, MEMO, INFO)
         self.logger.debug("read json data")
         self.refresh_bind_func()
         if with_message:
@@ -73,12 +74,14 @@ class OptionBar(tk.Frame):
         self.logger.debug(f"update OB['Member'] to {self.OB['Member']}")
         self.refresh_bind_func()
 
-    def parameter_update(self, SP, GP, MEMO):
+    def parameter_update(self, SP, GP, MEMO, INFO):
         for var in vars(SP):
             setattr(self.SP, var, getattr(SP, var))
         for var in vars(GP):
             setattr(self.GP, var, getattr(GP, var))
         self.MEMO["Memo"] = MEMO["Memo"]
+        self.INFO["Versions"] = INFO.get("Versions", "")
+        self.INFO["Report"] = INFO.get("Report", "")
     
     def _show_timed_popup(self, message, duration=1000):
         root = tk.Tk()

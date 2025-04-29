@@ -31,6 +31,7 @@ class SettingParametersServer:
     daily_info_combo_OverWork: List[str] = field(default_factory=lambda: [])
     command_buttons: List[str] = field(default_factory=lambda: ["Command01", "Command02"])
 
+
 @dataclass
 class SettingParameters(SettingParametersServer, SettingParametersLocal):
     pass
@@ -59,11 +60,12 @@ class GUIParameters(GUIParametersServer, GUIParametersLocal):
 
 
 class JSONReadWrite:
-    def __init__(self, local_dir, user_id, logger):
-        self.local_dir = os.path.dirname(os.path.abspath(local_dir))
+    def __init__(self, p_dir, user_id, logger):
+        self.p_dir = os.path.abspath(p_dir)
+        self.local_dir = os.path.dirname(os.path.abspath(p_dir))
         self.user_id = user_id
         self.logger = logger
-        self.logger.debug(f"local_dir: {local_dir}")
+        self.logger.debug(f"local_dir: {p_dir}")
 
     def read(self):
         # localに置いている設定データの読み込み
@@ -79,30 +81,36 @@ class JSONReadWrite:
         else:
             SPS = SettingParametersServer(**tmp_server["Setting"])
             GPS = GUIParametersServer(**tmp_server["GUI"])
+        SP = SettingParameters(**vars(SPL), **vars(SPS))
+        GP = GUIParameters(**vars(GPL), **vars(GPS))
+
         MEMO = self._read_json(SPL.server_dir, f"memo_{self.user_id}.json")
         if MEMO is None:
             MEMO = self._white_memo()
-        SP = SettingParameters(**vars(SPL), **vars(SPS))
-        GP = GUIParameters(**vars(GPL), **vars(GPS))
-        return SP, GP, MEMO
+        INFO = self._read_json(self.p_dir, f"version_report.json", {})
+        INFO["Report"] = self._read_json(SPL.server_dir, f"report_{self.user_id}.json", "")
 
-    def _read_json(self, p_dir, file_name):
+        return SP, GP, MEMO, INFO
+
+    def _read_json(self, p_dir, file_name, return_no_file=None):
         file_name = os.path.join(p_dir, file_name)
         self.logger.debug(f"json file exists: {os.path.exists(file_name)}")
         self.logger.debug(f"read json file: {file_name}")
         if not os.path.exists(file_name):
-            return None
+            return return_no_file
         with open(file_name, encoding="UTF-8") as f:
             tmp = json.load(f)
         return tmp
 
-    def write(self, server_dir, SP=None, GP=None, MEMO=None):
+    def write(self, server_dir, SP=None, GP=None, MEMO=None, BUG_REP=None):
         if SP is not None and GP is not None:
             PL, PS = self._arrange_parameters(SP, GP)
             self._write_json(SP.server_dir, f"setting_{self.user_id}.json", PS)
             self._write_json(self.local_dir, "setting.json", PL)
         if MEMO is not None:
             self._write_json(server_dir, f"memo_{self.user_id}.json", MEMO)
+        if BUG_REP is not None:
+            self._write_json(server_dir, f"report_{self.user_id}.json", BUG_REP)
 
     def _write_json(self, p_dir, file_name, save_item):
         file_name = os.path.join(p_dir, file_name)

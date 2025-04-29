@@ -12,6 +12,7 @@ import C_Tab07_Regularly as tab7
 import C_Tab08_Memo as tab8
 import C_Tab09_Recent as tab9
 import C_Tab51_Config as tab51
+import C_Tab52_Version_Report as tab52
 
 class MainWindow(ttk.Notebook):
     def __init__(self, master, **kwargs):
@@ -23,6 +24,7 @@ class MainWindow(ttk.Notebook):
         self.GP = master.GP
         self.OB = master.OB
         self.MEMO = master.MEMO
+        self.INFO = master.INFO
 
         self.set_variables()
         self.set_widgets()
@@ -46,6 +48,7 @@ class MainWindow(ttk.Notebook):
         self.w["Recent"] = tab9.RecentTicket(self)
         self.w["Memo"] = tab8.Memo(self)
         self.w["Config"] = tab51.ConfigTable(self)
+        self.w["Version"] = tab52.Version_Report(self)
         # self.w["Goals/Reflections"] = tk.Frame(self, bg="#555555")
         # self.w["Follows"] = tk.Frame(self, bg="#555555")
 

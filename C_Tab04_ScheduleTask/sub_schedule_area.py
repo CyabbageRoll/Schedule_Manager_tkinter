@@ -207,11 +207,11 @@ class ScheduleArea(tk.Frame):
                                              x0 + self.line_left_space, y0,
                                              fill="#FF8888",
                                              width=self.dy)
-            self.w["canvas"].create_line(x0 + self.line_left_space, y0,
+            self.w["canvas"].create_line(x0 + self.line_left_space+1, y0,
                                          x1 + self.line_left_space, y0, 
                                          fill=color, 
                                          width=self.dy)
-            self.w["canvas"].create_line(x0 + self.line_left_space, y0,
+            self.w["canvas"].create_line(x0 + self.line_left_space+1, y0,
                                          x0 + self.line_left_space + 5, y0,
                                          fill=self.color_dict[ds["Color"]],
                                          width=self.dy)
@@ -447,8 +447,8 @@ class ScheduleArea(tk.Frame):
                 w = self.SP.schedule_width * self.width_scale
                 end_date = end_date + datetime.timedelta(days=1)
                 if self.SP.schedule_calendar_type == "Daily":
-                    x0 = (begin_date - start_day).days * w + self.x00
-                    x1 = (end_date - start_day).days * w + self.x00
+                    x0 = max((begin_date - start_day).days, 0) * w + self.x00
+                    x1 = max((end_date - start_day).days, 0) * w + self.x00
                 if self.SP.schedule_calendar_type == "Weekly":
                     x0 = self.calc_weekly_x(start_day, begin_date, w)
                     x1 = self.calc_weekly_x(start_day, end_date, w)
@@ -460,8 +460,6 @@ class ScheduleArea(tk.Frame):
                 due_date_flag = False
                 all_schedule_items[p_id].append((x0, x1, idx, available_flag, due_date_flag))
 
-        print(all_schedule_items)
-        # defaultdict(<class 'list'>, {'250309_0151': [(0, -1800, '250316_5c49', False, False)], '250402_21ff4568': [(0, -1800, '250316_5c49', False, False)], '250316_cb6f': [(0, -1800, '250316_5c49', False, False)], '250316_99af': [(0, -800, '250406_081c610b', False, False)], '250316_dbfc': [(0, -800, '250406_081c610b', False, False)]})
         return all_schedule_items
 
     def convert_date_type(self, date, no_date_day=0):

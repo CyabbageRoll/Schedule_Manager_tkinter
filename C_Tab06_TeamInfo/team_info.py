@@ -39,10 +39,16 @@ class TeamInfo(tk.Frame):
         self.w["info4"].place(relx=0.51, rely=0.51, relwidth=0.49, relheight=0.49)
 
     def refresh(self):
+        self.txt_update_config("normal")
         self.set_info1()
         self.set_info2()
         self.set_info3()
         self.set_info4()
+        self.txt_update_config("disable")
+
+    def txt_update_config(self, state):
+        for key in self.w:
+            self.w[key].configure(state=state)
 
     def set_init(self):
         self.refresh()

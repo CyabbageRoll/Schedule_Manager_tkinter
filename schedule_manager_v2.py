@@ -15,15 +15,15 @@ import utils as ut
 class ScheduleManager(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.VER = "v2-r20250422"
+        self.VER = "v2-r20250506"
         self.user_id = os.environ.get('USERNAME') or os.environ.get('USER')
-        p_dir = os.path.dirname(__file__)
-        self.log_file = os.path.join(p_dir, f"./log/debug_{self.user_id}.log")
+        self.p_dir = os.path.dirname(__file__)
+        self.log_file = os.path.join(self.p_dir, f"./log/debug_{self.user_id}.log")
         self.logger = ut.logger_settings(log_file=self.log_file, add_info=self.VER)
         self.log_min = datetime.datetime.now() - datetime.timedelta(minutes=10)
         self.report_callback_exception = self.log_exception
-        self.json_rw = DS.JSONReadWrite(p_dir, self.user_id, self.logger)
-        self.SP, self.GP, self.MEMO = self.json_rw.read()
+        self.json_rw = DS.JSONReadWrite(self.p_dir, self.user_id, self.logger)
+        self.SP, self.GP, self.MEMO, self.INFO = self.json_rw.read()
         self.SD = DS.read_schedule_data(self.logger, self.SP.server_dir)
         self.OB = {"Member": self.SP.user, "Date": datetime.date.today().strftime(r"%Y-%m-%d")}
         self.tk_setting()
