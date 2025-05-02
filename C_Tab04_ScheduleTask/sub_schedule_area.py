@@ -51,6 +51,7 @@ class ScheduleArea(tk.Frame):
         self.w["canvas"].create_text(0, 0, text="")
 
     def set_init(self):
+        self.class_idx = self.SP.schedule_prj_type
         self.update(mode="both")
     
     ## 更新 ==============================================================
@@ -90,8 +91,8 @@ class ScheduleArea(tk.Frame):
 
             self.create_calendar_items(start_day=start_day, holiday=False)
             df_items = self.get_draw_items_for_sch()
-            all_schedule_items = self.calculate_x_and_date_flag_for_sch(df_items, start_day)
-            self.draw_project_schedules(all_schedule_items)
+            all_schedule_items, sorted_pid = self.calculate_x_and_date_flag_for_sch(df_items, start_day)
+            self.draw_project_schedules(all_schedule_items, sorted_pid)
 
         self.set_bind()
 
@@ -148,15 +149,20 @@ class ScheduleArea(tk.Frame):
 
     ## ガントチャート表示 ==============================================================
     # 順番にスケジュールを表示させる
-    def draw_project_schedules(self, all_schedule_items):
+    def draw_project_schedules(self, all_schedule_items, sorted_pid=None):
         y0 = self.y00 * 1
-        for p_id, schedule_items in all_schedule_items.items():
-            y0 = self.draw_single_project_schedule(p_id, y0, schedule_items)
+        if sorted_pid is None:
+            sorted_pid = sorted(all_schedule_items.keys())
+        for p_id in sorted_pid:
+            schedule_item = all_schedule_items[p_id]
+            if len(schedule_item) == 0:
+                continue
+            y0 = self.draw_single_project_schedule(p_id, y0, schedule_item)
 
     # 1つの束のスケジュールを表示させる
     def draw_single_project_schedule(self, p_id, y0, schedule_items):
         # 親の表示
-        df_p = self.SD[self.class_idx-1]
+        df_p = self.SD[self.class_idx-1].copy()
         ds_p = df_p.loc[p_id]
         names = self.get_parent_name(self.class_idx-1, p_id)
         ye = self.dy * (len(schedule_items) + 2)
@@ -240,7 +246,7 @@ class ScheduleArea(tk.Frame):
     def get_parent_name(self, class_idx, idx):
         names = []
         for i in range(class_idx):
-            df = self.SD[self.class_idx - 1 - i]
+            df = self.SD[self.class_idx - 1 - i].copy()
             name, idx = df.loc[idx, ["Name", "Parent_ID"]]
             names.append(name)
         names = [n for n in names if n != "-"]
@@ -288,7 +294,7 @@ class ScheduleArea(tk.Frame):
     def get_draw_items(self):
         p_ids = set(self.SD[self.class_idx-1].index.tolist())
         p_ids = [p_id for p_id in p_ids if p_id not in self.undraw_p_ids]
-        df = self.SD[self.class_idx]
+        df = self.SD[self.class_idx].copy()
         df = df[df["Status"] == "ToDo"]
         if self.class_idx == 6:
             df = df[df["Owner"] == self.OB["Member"]]
@@ -300,8 +306,8 @@ class ScheduleArea(tk.Frame):
     def squeeze_user_related_df(self, df, member, class_idx):
         relative_ids = []
         for i in range(class_idx, 6):
-            df_child = self.SD[6 - i + class_idx]
-            df_parent = self.SD[5 - i + class_idx]
+            df_child = self.SD[6 - i + class_idx].copy()
+            df_parent = self.SD[5 - i + class_idx].copy()
             df_child = df_child[df_child["Status"] == "ToDo"]
             df_parent = df_parent[df_parent["Status"] == "ToDo"]
             # 子供の工数を足し合わせて親の工数を更新
@@ -429,6 +435,7 @@ class ScheduleArea(tk.Frame):
 
         # 子供から表示するものだけを取り出す
         df_c = df_c[df_c["Status"].isin(["ToDo", "Done"])]
+        df_c = df_c[df_c["Name"] != "-"]
         if select_case == 0:
             df_c = df_c[df_c["Owner"] == self.OB["Member"]]
         df_items = {p_id: df_c[df_c["Parent_ID"] == p_id] for p_id in p_ids}
@@ -459,8 +466,7 @@ class ScheduleArea(tk.Frame):
                 available_flag = False
                 due_date_flag = False
                 all_schedule_items[p_id].append((x0, x1, idx, available_flag, due_date_flag))
-
-        return all_schedule_items
+        return all_schedule_items, sorted_p_ids
 
     def convert_date_type(self, date, no_date_day=0):
         if not date:
@@ -487,9 +493,9 @@ class ScheduleArea(tk.Frame):
     def get_parent_indices_and_name(self, class_idx, idx):
         p2c_dic_single = {}
         for i in range(class_idx):
-            df = self.SD[self.class_idx - 1 - i]
-            name, pid = df.loc[idx, ["Name", "Parent_ID"]]
-            p2c_dic_single[pid] = (idx, name)
+            df = self.SD[self.class_idx - 1 - i].copy()
+            name, pid, order = df.loc[idx, ["Name", "Parent_ID", "OrderValue"]]
+            p2c_dic_single[pid] = (idx, name, order)
             idx = pid
         return p2c_dic_single
     
@@ -497,15 +503,15 @@ class ScheduleArea(tk.Frame):
         p2c_dic = defaultdict(list)
         for task_id in task_ids:
             p2c_dic_single = self.get_parent_indices_and_name(class_idx=self.class_idx-1, idx=task_id)
-            for pid, (idx, name) in p2c_dic_single.items():
-                p2c_dic[pid].append((name, idx))
+            for pid, (idx, name, order) in p2c_dic_single.items():
+                p2c_dic[pid].append((order, name, idx))
         
         sorted_idx = []
-        search_list = sorted(list(set(p2c_dic["0"])))
+        search_list = sorted(list(set(p2c_dic["0"])), reverse=True)
         while search_list:
-            name, idx = search_list.pop()
+            _, name, idx = search_list.pop()
             if idx in task_ids:
                 sorted_idx.append((idx))
             else:
-                search_list.extend(sorted(list(set(p2c_dic.get(idx, [])))))
+                search_list.extend(sorted(list(set(p2c_dic.get(idx, []))), reverse=True))
         return sorted_idx

@@ -29,8 +29,8 @@ class ScheduleTask(tk.Frame):
     def set_widgets(self):
         self.w = OrderedDict()
         self.w["holidays"] = sf.LabelEntryBox(self, "Holidays", label_width=15, init_value=self.SP.schedule_holidays)
-        self.w["inp_box"] = tab4.SettingButtons(self)
         self.w["inp_box2"] = tab4.SettingButtons2(self, self.display_type_list)
+        self.w["inp_box"] = tab4.SettingButtons(self)
         self.w["label"] = tk.Label(self, textvariable=self.msg, font=self.font, anchor="w")
         self.w["schedule"] = tab4.ScrollableScheduleArea(self)
 
@@ -67,11 +67,23 @@ class ScheduleTask(tk.Frame):
             prj_type = self.w["inp_box"].get_prj_type()
             self.SP.schedule_prj_type = prj_type
             self.w["schedule"].w["area"].class_idx = prj_type
-        if mode == "calendar":
-            calendar_type = self.w["inp_box"].get_calendar_type()
-            self.SP.schedule_calendar_type = calendar_type
-            self.w["schedule"].w["area"].calendar_type = calendar_type
-        self.w["schedule"].update(mode)
+            # prj typeが1~4の時は、scheduleの月表示、5はGantt表示で週、6はGanntt表示で日にする
+            if prj_type in [1, 2, 3, 4]:
+                self.w["inp_box2"].w["display_type"].set("Schedule")
+                self.SP.schedule_display_type = "Schedule"
+                self.w["inp_box"].w["date_type"].set("Monthly")
+            if prj_type in [5, 6]:
+                self.w["inp_box2"].w["display_type"].set("Gantt")
+                self.SP.schedule_display_type = "Gantt"
+                if prj_type == 5:
+                    self.w["inp_box"].w["date_type"].set("Weekly")
+                if prj_type == 6:
+                    self.w["inp_box"].w["date_type"].set("Daily")
+
+        calendar_type = self.w["inp_box"].get_calendar_type()
+        self.SP.schedule_calendar_type = calendar_type
+        self.w["schedule"].w["area"].calendar_type = calendar_type
+        self.w["schedule"].update(mode="both")
 
     def update(self, mode="both"):
         self.w["schedule"].update(mode)

@@ -67,15 +67,17 @@ class ScrollableRegularlyArea(tk.Frame):
 
         item = self.w["area"].w["canvas"].find_withtag("current")
         if item:
-            class_idx, idx = self.w["area"].on_canvas_items[item[0]]
-            self.click_bind_func(class_idx, idx)
+            class_idx, idx = self.w["area"].on_canvas_items.get(item[0], [None, None])
+            if class_idx:
+                self.click_bind_func(class_idx, idx)
 
     def mouse_click_right(self, event):
         item = self.w["area"].w["canvas"].find_withtag("current")
         if not item:
             return
-        class_idx, idx = self.w["area"].on_canvas_items[item[0]]
-        self.show_menu(event, class_idx, idx)
+        class_idx, idx = self.w["area"].on_canvas_items.get(item[0], [None, None])
+        if class_idx:
+            self.show_menu(event, class_idx, idx)
 
     def show_menu(self, event, class_idx, idx):
         # メニューを指定した位置に表示

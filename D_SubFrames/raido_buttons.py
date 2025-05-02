@@ -33,3 +33,6 @@ class RadioButtons(tk.Frame):
     def _call_back_func(self, x):
         if self.call_back_func is not None:
             self.call_back_func(x)
+
+    def set(self, txt):
+        self.var.set(txt)
